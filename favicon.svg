@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Dark outer glowing background gradient -->
+    <radialGradient id="bgGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#1b202e" />
+      <stop offset="100%" stop-color="#11141a" />
+    </radialGradient>
+    
+    <!-- Vibrant Red Sports Gradient for the main icon body -->
+    <linearGradient id="primaryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff6b81" />
+      <stop offset="100%" stop-color="#ff4757" />
+    </linearGradient>
+
+    <!-- Electric Storm Lightning Gradient -->
+    <linearGradient id="boltGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#a4b0be" />
+    </linearGradient>
+
+    <!-- Soft outer glow shadow effect -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="12" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Background Base App Icon Rounded Square -->
+  <rect width="512" height="512" rx="110" fill="url(#bgGrad)" stroke="#2c3243" stroke-width="4"/>
+
+  <!-- Main Glowing Sports Play Circle -->
+  <circle cx="256" cy="256" r="150" fill="url(#primaryGrad)" filter="url(#glow)" />
+
+  <!-- Inner Dynamic Lightning Bolt Cutout (The "Storm" aspect) -->
+  <polygon points="270,140 190,260 250,260 220,370 320,230 260,230" fill="url(#boltGrad)" />
+
+  <!-- Small Elegant Live Streaming Broadcast Indicator -->
+  <circle cx="410" cy="100" r="14" fill="#2ed573" />
+  <circle cx="410" cy="100" r="24" fill="none" stroke="#2ed573" stroke-width="3" opacity="0.5" />
+</svg>
