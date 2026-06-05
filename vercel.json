@@ -1,7 +1,13 @@
 {
   "version": 2,
-  "rewrites": [
-    { "source": "/", "destination": "/index.html" },
-    { "source": "/api/stream", "destination": "/api/stream.js" }
+  "routes": [
+    {
+      "src": "/api/live",
+      "dest": "/api/live.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
+    }
   ]
 }
