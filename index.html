@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Live Sports Stream - WebStorm</title>
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FRTBSRJGT0"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-FRTBSRJGT0');
+    </script>
+    
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@clappr/player@latest/dist/clappr.min.js"></script>
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        :root {
+            --bg-color: #11141a;
+            --panel-color: #1b202e;
+            --primary-color: #ff4757;
+            --text-main: #ffffff;
+            --text-muted: #a4b0be;
+            --live-green: #2ed573;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        header {
+            background-color: var(--panel-color);
+            padding: 12px 20px;
+            border-bottom: 3px solid var(--primary-color);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        header h1 { font-size: 1.3rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        header h1 span { color: var(--primary-color); }
+        .live-indicator {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            animation: blink 1.5s infinite;
+        }
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 15px; 
+            transition: filter 0.3s ease;
+        }
+        .player-container {
+            width: 100%;
+            background-color: #000;
+            border-radius: 8px; 
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid #2c3243;
+            aspect-ratio: 16 / 9;
+            position: relative;
+        }
+        #video-display { width: 100%; height: 100%; }
+        
+        .mobile-fallback-card {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1b202e 0%, #11141a 100%);
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
+            z-index: 50;
+        }
+        .mobile-fallback-card h3 { font-size: 1.1rem; color: #fff; margin-bottom: 8px; }
+        .mobile-fallback-card p { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 15px; max-width: 85%; }
+        
+        .external-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 24px;
+            background-color: #2ed573;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 5px;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            box-shadow: 0 4px 15px rgba(46, 213, 115, 0.4);
+            margin-bottom: 10px;
+            width: 80%;
+            max-width: 280px;
+            border: none;
+            cursor: pointer;
+        }
+        .external-btn.vlc { background-color: #ff9f43; box-shadow: 0 4px 15px rgba(255, 159, 67, 0.4); }
+
+        .stream-info {
+            width: 100%;
+            margin-top: 20px;
+            background-color: var(--panel-color);
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid var(--primary-color);
+        }
+        .stream-info h2 { font-size: 1.1rem; margin-bottom: 6px; }
+        .stream-info p { color: var(--text-muted); font-size: 0.85rem; line-height: 1.4; }
+        .viewer-count {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(255, 71, 87, 0.1);
+            border: 1px solid var(--primary-color);
+            color: var(--text-main);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: 8px;
+            margin-bottom: 4px;
+        }
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--live-green);
+            border-radius: 50%;
+            margin-right: 8px;
+            box-shadow: 0 0 8px var(--live-green);
+            animation: pulse 1.2s infinite;
+        }
+        footer {
+            background-color: #0d1017;
+            text-align: center;
+            padding: 15px;
+            font-size: 0.75rem;
+            color: #57606f;
+            border-top: 1px solid var(--panel-color);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+        .instruction-modal {
+            background-color: var(--panel-color);
+            border: 2px solid var(--primary-color);
+            border-radius: 12px;
+            padding: 25px;
+            max-width: 450px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+        }
+        .modal-title { font-size: 1.4rem; font-weight: bold; color: #ffffff; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
+        .modal-title span { color: var(--primary-color); }
+        .modal-body { color: var(--text-muted); font-size: 0.95rem; line-height: 1.5; margin-bottom: 22px; text-align: left; }
+        .modal-item { margin-bottom: 12px; display: flex; align-items: flex-start; }
+        .modal-icon { color: var(--primary-color); margin-right: 10px; font-size: 1.1rem; }
+        .modal-btn { background-color: var(--primary-color); color: #ffffff; border: none; padding: 12px 30px; font-size: 0.95rem; font-weight: bold; border-radius: 6px; cursor: pointer; text-transform: uppercase; width: 100%; }
+
+        body.modal-active main { filter: blur(4px); pointer-events: none; }
+
+        @media (min-width: 480px) {
+            header h1 { font-size: 1.5rem; }
+            .stream-info h2 { font-size: 1.25rem; }
+            .stream-info p { font-size: 0.95rem; }
+        }
+        @media (min-width: 1024px) {
+            main { justify-content: flex-start; padding-top: 40px; }
+            .player-container, .stream-info { max-width: 960px; }
+        }
+        @media (max-width: 767px) {
+            .player-container { border-radius: 0; border-left: none; border-right: none; }
+            main { padding: 0 0 15px 0; }
+            .stream-info { width: 92%; margin-top: 15px; }
+        }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+        @keyframes pulse { 0% { transform: scale(0.9); opacity: 0.6; } 50% { transform: scale(1.1); opacity: 1; box-shadow: 0 0 12px var(--live-green); } 100% { transform: scale(0.9); opacity: 0.6; } }
+    </style>
+</head>
+<body class="modal-active">
+
+    <div class="modal-overlay" id="popup-modal">
+        <div class="instruction-modal">
+            <div class="modal-title"><span>⚠️</span> Streaming Instructions</div>
+            <div class="modal-body">
+                <div class="modal-item">
+                    <span class="modal-icon">📶</span>
+                    <p><b>Mobile Users Option:</b> If the player encounters an error on your browser, simply tap the custom buttons to open it flawlessly inside your system media apps.</p>
+                </div>
+                <div class="modal-item">
+                    <span class="modal-icon">🔄</span>
+                    <p><b>Lagging Issues:</b> If the video stream buffers or freezes up, kindly <b>reload / refresh</b> your browser page.</p>
+                </div>
+                <div class="modal-item">
+                    <span class="modal-icon">🎧</span>
+                    <p><b>Audio Muted:</b> Browsers block auto-playing sound. If there's no sound, just tap the speaker button inside the player dashboard.</p>
+                </div>
+            </div>
+            <button class="modal-btn" onclick="closeInstructions()">Got It, Let's Watch!</button>
+        </div>
+    </div>
+
+    <header>
+        <h1>Web<span>Storm</span></h1>
+        <div class="live-indicator">● LIVE</div>
+    </header>
+
+    <main>
+        <div class="player-container">
+            <div id="video-display"></div>
+            
+            <div id="mobile-card" class="mobile-fallback-card">
+                <h3>📱 Mobile Streaming Engine</h3>
+                <p>Mobile web browsers block this network token stream. Tap below to stream directly inside your device players without ads or limits:</p>
+                
+                <a id="native-app-link" href="#" class="external-btn">▶️ Play in Device Player</a>
+                <a id="vlc-app-link" href="#" class="external-btn vlc">🧡 Open in VLC Mobile</a>
+            </div>
+        </div>
+
+        <div class="stream-info">
+            <h2>Live Match Streaming: West Indies vs Sri Lanka Tour</h2>
+            
+            <div class="viewer-count">
+                <span class="pulse-dot"></span>
+                <span id="view-number">1</span> fans watching live
+            </div>
+            <br><br>
+
+            <h3>Upcoming:</h3>
+            <h2>2nd ODI, Sun 07 Jun, 2026, @1:00 AM</h2><br>
+            <p>This is a simple website for all Sri Lankan supporters to view ODI and T20 series. If you notice lag, kindly refresh your browser.</p>
+            <p><b>Crafted with ❤️ for cricket lovers! Developed by Venuja.</b></p>
+        </div>
+    </main>
+
+    <footer>&copy; 2026 WebStorm Player. All rights reserved.</footer>
+
+    <script>
+        let clapprPlayerInstance = null;
+        let linkVariantOne = "";
+        let linkVariantTwo = "";
+
+        function closeInstructions() {
+            document.getElementById('popup-modal').style.opacity = '0';
+            document.body.classList.remove('modal-active');
+            
+            setTimeout(() => {
+                document.getElementById('popup-modal').style.display = 'none';
+                if(clapprPlayerInstance) {
+                    clapprPlayerInstance.play().catch(err => console.log("Autoplay context initialization caught"));
+                }
+            }, 300);
+        }
+
+        // Initialize and stream source extraction sequence 
+        async function startStreamingEngine() {
+            const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+            try {
+                const response = await fetch('/api/stream');
+                const data = await response.json();
+                linkVariantOne = data.streamLinkOne;
+                linkVariantTwo = data.streamLinkTwo;
+            } catch (err) {
+                console.error("API link delivery failed, running internal fallbacks");
+            }
+
+            if(isMobileDevice && linkVariantOne) {
+                document.getElementById('native-app-link').href = linkVariantOne;
+                document.getElementById('vlc-app-link').href = "vlc://" + linkVariantOne.replace(/^https?:\/\//, "");
+            }
+
+            let playerConfiguration = {
+                source: linkVariantOne,
+                poster: "./poster.png",
+                parentId: "#video-display",
+                width: "100%",
+                height: "100%",
+                autoPlay: true,
+                mute: true,
+                mimeType: "application/x-mpegURL",
+                preload: "auto",
+                playback: {
+                    playInline: true,
+                    recycleVideo: true
+                }
+            };
+
+            if (!isMobileDevice) {
+                playerConfiguration.playback.hlsjsConfig = {
+                    enableWorker: true,
+                    lowLatencyMode: true,
+                    maxBufferLength: 6,
+                    liveSyncDurationCount: 3,
+                    liveMaxLatencyDurationCount: 5,
+                    maxMaxBufferLength: 15
+                };
+            }
+
+            clapprPlayerInstance = new Clappr.Player(playerConfiguration);
+
+            clapprPlayerInstance.on(Clappr.Events.PLAYER_ERROR, function() {
+                let currentSource = clapprPlayerInstance.getPlugin('container').options.source;
+                if (currentSource === linkVariantOne && linkVariantOne !== linkVariantTwo) {
+                    console.log("Switching to secondary fallback engine link...");
+                    clapprPlayerInstance.load(linkVariantTwo);
+                    clapprPlayerInstance.play();
+                } else {
+                    if(isMobileDevice) {
+                        document.getElementById('mobile-card').style.display = "flex";
+                    }
+                }
+            });
+
+            clapprPlayerInstance.on(Clappr.Events.PLAYER_PLAY, function() {
+                const videoElement = document.querySelector('#video-display video');
+                if (videoElement) {
+                    videoElement.addEventListener('waiting', () => {
+                        setTimeout(() => {
+                            if (videoElement.paused === false) {
+                                videoElement.currentTime = videoElement.currentTime + 0.5;
+                            }
+                        }, 2000); 
+                    });
+                }
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", startStreamingEngine);
+    </script>
+
+    <script>
+        function updateLiveViewers() {
+            const baseTraffic = 145; 
+            const variance = Math.floor(Math.random() * 40) - 20; 
+            const currentViewers = Math.max(80, baseTraffic + variance);
+            document.getElementById('view-number').innerText = currentViewers.toLocaleString();
+        }
+        updateLiveViewers();
+        setInterval(updateLiveViewers, 4000);
+    </script>
+</body>
+</html>
