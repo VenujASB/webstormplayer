@@ -1,0 +1,56 @@
+export default async function handler(req, res) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET');
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Cache-Control', 'no-cache, must-revalidate');
+
+    const watchPageUrl = "https://go.webcric.com/watch-west-indies-vs-sri-lanka-on-willow-live-cricket-streaming.htm";
+    const requestOptions = {
+        headers: {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Referer": "https://go.webcric.com/"
+        }
+    };
+
+    // Hardcoded default fallback links from your script
+    let streamLinkOne = "https://mut001.myturn1.top:8088/live/webcrict10/playlist.m3u8?vidictid=206092993441&id=113947&pk=f5663d77383e406c10621257e598bb893e11664c8bd251a68d11e1a9c169f928f618b4f17dbca2c919c3a4672e5e32b3cbe6b3be4a15a24eba9fcfb2a56163b6";
+    let streamLinkTwo = "https://plu001.myturn1.top:8088/live/webcricwillow/playlist.m3u8?vidictid=20610115721&id=120375&pk=dc8e81208bb10c8ff745085fa630e09b1b4007907fd0eb7fb3ceaa1862f89b54f618b4f17dbca2c919c3a4672e5e32b3cbe6b3be4a15a24eba9fcfb2a56163b6";
+
+    try {
+        const watchPageResponse = await fetch(watchPageUrl, requestOptions);
+        if (watchPageResponse.ok) {
+            const watchHtml = await watchPageResponse.text();
+            const embedMatch = watchHtml.match(/embed\.php\?id=\d+/);
+            const embedUrl = embedMatch ? `https://go.webcric.com/${embedMatch[0]}` : "https://go.webcric.com/embed.php?id=120375";
+
+            const embedResponse = await fetch(embedUrl, requestOptions);
+            if (embedResponse.ok) {
+                const embedHtml = await embedResponse.text();
+                const streamMatches = embedHtml.match(/(https?:\\?\/\\?\/[^\s"']+\.m3u8[^\s"']*)/g);
+                
+                if (streamMatches && streamMatches.length > 0) {
+                    const scrapedUrl = streamMatches[0].replace(/\\/g, '');
+                    
+                    if (scrapedUrl.startsWith('http')) {
+                        streamLinkOne = scrapedUrl;
+
+                        if (scrapedUrl.includes('mut001')) {
+                            streamLinkTwo = scrapedUrl.replace('mut001', 'mut002');
+                        } else if (scrapedUrl.includes('plu001')) {
+                            streamLinkTwo = scrapedUrl.replace('plu001', 'plu002');
+                        } else {
+                            streamLinkTwo = scrapedUrl.replace('001', '002');
+                        }
+                    }
+                }
+            }
+        }
+    } catch (error) {
+        console.error("Sniffer routine fallback triggered:", error);
+    }
+
+    return res.status(200).json({
+        streamLinkOne: streamLinkOne,
+        streamLinkTwo: streamLinkTwo
+    });
+}
