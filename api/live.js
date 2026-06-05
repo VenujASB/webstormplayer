@@ -1,8 +1,8 @@
 export default async function handler(req, res) {
-    // 1. Enable cross-origin requests so your index.html can load the feed
+    // 1. Set explicit streaming headers to prevent CORS blocking issues
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET');
-    res.setHeader('Content-Type', 'application/x-mpegURL'); 
+    res.setHeader('Content-Type', 'application/vnd.apple.mpegurl'); // Standard HLS playlist MIME type
 
     const watchPageUrl = "https://go.webcric.com/watch-west-indies-vs-sri-lanka-on-willow-live-cricket-streaming.htm";
     const requestOptions = {
@@ -13,7 +13,7 @@ export default async function handler(req, res) {
     };
 
     try {
-        // 2. Fetch the WebCric page layout dynamically
+        // 2. Fetch the WebCric document markup layout
         const watchResponse = await fetch(watchPageUrl, requestOptions);
         const watchHtml = await watchResponse.text();
 
@@ -33,31 +33,34 @@ export default async function handler(req, res) {
                 realLiveUrl = realLiveUrl.split(/["']/)[0];
             }
 
-            // Extract the base path of the stream server (e.g., https://mut001.myturn1.top:8088/live/webcrict10/)
+            // Extract the base host path of WebCric's server (e.g., https://mut001.myturn1.top:8088/live/webcrict10/)
             const urlTokens = realLiveUrl.split('/');
             urlTokens.pop(); 
             const streamBaseUrl = urlTokens.join('/') + '/';
 
-            // 3. Fetch the live manifest playlist directly from WebCric
+            // 3. Download the actual live playlist manifest file data
             const streamResponse = await fetch(realLiveUrl, { headers: { "Referer": "https://go.webcric.com/" } });
-            let manifestText = await streamResponse.text();
+            const rawManifestText = await streamResponse.text();
 
-            // 4. Resolve relative paths so Clappr knows where to download the video segments (.ts chunks)
-            let fixedManifest = manifestText.split('\n').map(line => {
-                if (line.trim() && !line.startsWith('#') && !line.startsWith('http')) {
-                    return streamBaseUrl + line.trim();
+            // 4. THE PATH-FIXING REWRITE LOOP
+            // This reads every line of the manifest text and rewrites relative links to absolute links
+            let resolvedManifest = rawManifestText.split('\n').map(line => {
+                let cleanLine = line.trim();
+                if (cleanLine.length > 0 && !cleanLine.startsWith('#') && !cleanLine.startsWith('http')) {
+                    // Turn relative paths like "chunk_01.ts" into absolute paths
+                    return streamBaseUrl + cleanLine;
                 }
                 return line;
             }).join('\n');
 
-            return res.status(200).send(fixedManifest);
+            return res.status(200).send(resolvedManifest);
         } else {
-            throw new Error("Stream Link Not Found");
+            throw new Error("Stream Offline");
         }
 
     } catch (error) {
-        // Fallback: If offline or expired, serve a stable placeholder playlist loop
-        const stablePlaceholder = `#EXTM3U\n#EXT-X-VERSION:3\n#EXT-X-TARGETDURATION:5\n#EXTINF:5.0,\nhttps://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4`;
-        return res.status(200).send(stablePlaceholder);
+        // Safe placeholder loop: Plays a sample video clip if the match goes offline
+        const safePlaceholder = `#EXTM3U\n#EXT-X-VERSION:3\n#EXT-X-TARGETDURATION:5\n#EXTINF:5.0,\nhttps://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4`;
+        return res.status(200).send(safePlaceholder);
     }
 }
