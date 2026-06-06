@@ -325,8 +325,8 @@
     <script>
         let clapprPlayerInstance = null;
         
-        // DIRECT COUPLING ENGINE PATH TO LINODE DIRECTORY
-        const permanentProxySource = "http://45.79.124.104/stream/cricket.m3u8";
+        // SWITCHED FROM LINODE MIDDLEMAN TO DIRECT SECURE TARGET ROUTING
+        const permanentProxySource = "https://mut001.myturn1.top:8088/live/webcricwillow/playlist.m3u8?id=120375&pk=aa05930de864cc4a2578a0d8d0982a87fc91b81269359d598db2245365aece68341da41f37dac094b3eaef58b5d8bafb19caec663d46901294d9e41e1be40abf";
 
         function closeInstructions() {
             document.getElementById('popup-modal').style.opacity = '0';
@@ -335,7 +335,7 @@
             setTimeout(() => {
                 document.getElementById('popup-modal').style.display = 'none';
                 if(clapprPlayerInstance) {
-                    clapprPlayerInstance.play().catch(err => console.log("Autoplay forced initialization initialization failed"));
+                    clapprPlayerInstance.play().catch(err => console.log("Autoplay forced initialization failed"));
                 }
             }, 300);
         }
@@ -344,8 +344,8 @@
             const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
             if(isMobileDevice) {
-                // Configures mobile intents to push cleanly inside Android MXPlayer/iOS native players
-                document.getElementById('native-app-link').href = "intent://" + permanentProxySource.replace(/^https?:\/\//, "") + "#Intent;scheme=http;type=video/*;end";
+                // Configures native app intents using the raw link protocol structure
+                document.getElementById('native-app-link').href = "intent://" + permanentProxySource.replace(/^https?:\/\//, "") + "#Intent;scheme=https;type=video/*;end";
                 document.getElementById('vlc-app-link').href = "vlc://" + permanentProxySource.replace(/^https?:\/\//, "");
             }
 
@@ -355,12 +355,13 @@
                 width: "100%",
                 height: "100%",
                 autoPlay: true,
-                mute: false,
+                mute: true, // Switched to true to prevent modern browsers from blocking initial load execution
                 mimeType: "application/x-mpegURL",
                 preload: "auto",
                 playback: {
                     playInline: true,
-                    recycleVideo: true
+                    recycleVideo: true,
+                    crossOrigin: 'anonymous' // Bypass credentials request layer restrictions
                 }
             };
 
@@ -371,7 +372,11 @@
                     maxBufferLength: 6,
                     liveSyncDurationCount: 3,
                     liveMaxLatencyDurationCount: 5,
-                    maxMaxBufferLength: 15
+                    maxMaxBufferLength: 15,
+                    xhrSetup: function(xhr, url) {
+                        // Suppresses standard credential flags that cause Vidict Media Server rejections
+                        xhr.withCredentials = false;
+                    }
                 };
             }
 
