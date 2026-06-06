@@ -202,7 +202,6 @@
         .modal-title { font-size: 1.4rem; font-weight: bold; color: #ffffff; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
         .modal-title span { color: var(--primary-color); }
         .modal-body { color: var(--text-muted); font-size: 0.95rem; line-height: 1.5; margin-bottom: 22px; text-align: left; }
-        .modal-body p b { color: #fff; }
         .modal-item { margin-bottom: 12px; display: flex; align-items: flex-start; }
         .modal-icon { color: var(--primary-color); margin-right: 10px; font-size: 1.1rem; }
         .modal-btn { background-color: var(--primary-color); color: #ffffff; border: none; padding: 12px 30px; font-size: 0.95rem; font-weight: bold; border-radius: 6px; cursor: pointer; text-transform: uppercase; width: 100%; }
@@ -223,6 +222,8 @@
             main { padding: 0 0 15px 0; }
             .stream-info { width: 92%; margin-top: 15px; }
         }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+        @keyframes pulse { 0% { transform: scale(0.9); opacity: 0.6; } 50% { transform: scale(1.1); opacity: 1; box-shadow: 0 0 12px var(--live-green); } 100% { transform: scale(0.9); opacity: 0.6; } }
     </style>
 </head>
 <body class="modal-active">
@@ -285,22 +286,50 @@
     <footer>&copy; 2026 WebStorm Player. All rights reserved.</footer>
 
     <script type="text/javascript">
-        document.addEventListener('contextmenu', function(e) { e.preventDefault(); }, false);
-        document.addEventListener('keydown', function(e) {
-            if (e.key === "F12" || e.keyCode === 123) { e.preventDefault(); return false; }
-            if (e.ctrlKey && e.shiftKey && (e.key === "I" || e.keyCode === 73)) { e.preventDefault(); return false; }
-            if (e.ctrlKey && e.shiftKey && (e.key === "J" || e.keyCode === 74)) { e.preventDefault(); return false; }
-            if (e.ctrlKey && (e.key === "U" || e.keyCode === 85)) { e.preventDefault(); return false; }
-            if (e.ctrlKey && (e.key === "S" || e.keyCode === 83)) { e.preventDefault(); return false; }
+        // 1. Block Mouse Right-Clicks
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
         }, false);
-        document.addEventListener('dragstart', function(e) { e.preventDefault(); });
+
+        // 2. Block Core Keyboard Shortcuts (F12, Inspect Elements, Source Reads)
+        document.addEventListener('keydown', function(e) {
+            // Block F12
+            if (e.key === "F12" || e.keyCode === 123) {
+                e.preventDefault();
+                return false;
+            }
+            // Block Ctrl+Shift+I (Inspect)
+            if (e.ctrlKey && e.shiftKey && (e.key === "I" || e.keyCode === 73)) {
+                e.preventDefault();
+                return false;
+            }
+            // Block Ctrl+Shift+J (Console)
+            if (e.ctrlKey && e.shiftKey && (e.key === "J" || e.keyCode === 74)) {
+                e.preventDefault();
+                return false;
+            }
+            // Block Ctrl+U (View Page Source)
+            if (e.ctrlKey && (e.key === "U" || e.keyCode === 85)) {
+                e.preventDefault();
+                return false;
+            }
+            // Block Ctrl+S (Save Page)
+            if (e.ctrlKey && (e.key === "S" || e.keyCode === 83)) {
+                e.preventDefault();
+                return false;
+            }
+        }, false);
+
+        // 3. Prevent dragging interface elements
+        document.addEventListener('dragstart', function(e) {
+            e.preventDefault();
+        });
     </script>
 
     <script>
         let clapprPlayerInstance = null;
-        
-        // 🚀 Points directly to your secure proxy wrapper layer
-        const VPS_API_ENDPOINT = "https://cors-anywhere.herokuapp.com/http://45.79.124.104:5000/get_stream";
+        let linkVariantOne = "";
+        let linkVariantTwo = "";
 
         function closeInstructions() {
             document.getElementById('popup-modal').style.opacity = '0';
@@ -309,77 +338,67 @@
             setTimeout(() => {
                 document.getElementById('popup-modal').style.display = 'none';
                 if(clapprPlayerInstance) {
-                    clapprPlayerInstance.play().catch(err => console.log("Autoplay context execution bypassed"));
+                    clapprPlayerInstance.play().catch(err => console.log("Autoplay context initialization caught"));
                 }
             }, 300);
         }
 
         async function startStreamingEngine() {
             const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-            let permanentProxySource = "";
 
             try {
-                const response = await fetch(VPS_API_ENDPOINT, {
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                });
+                const response = await fetch('/api/stream');
                 const data = await response.json();
-                
-                if (data.status === "success" && data.url) {
-                    permanentProxySource = data.url;
-                    console.log("🔗 Active stream target registered:", permanentProxySource);
-                } else {
-                    throw new Error("Missing payload stream data key configurations");
-                }
-            } catch (error) {
-                console.error("❌ Failed fetching payload from harvester system:", error);
-                if(isMobileDevice) {
-                    document.getElementById('mobile-card').style.display = "flex";
-                }
-                return;
+                linkVariantOne = data.streamLinkOne;
+                linkVariantTwo = data.streamLinkTwo;
+            } catch (err) {
+                console.error("API link delivery failed, running internal fallbacks");
             }
 
-            if(isMobileDevice) {
-                document.getElementById('native-app-link').href = "intent://" + permanentProxySource.replace(/^https?:\/\//, "") + "#Intent;scheme=https;type=video/*;end";
-                document.getElementById('vlc-app-link').href = "vlc://" + permanentProxySource.replace(/^https?:\/\//, "");
+            if(isMobileDevice && linkVariantOne) {
+                document.getElementById('native-app-link').href = linkVariantOne;
+                document.getElementById('vlc-app-link').href = "vlc://" + linkVariantOne.replace(/^https?:\/\//, "");
             }
 
             let playerConfiguration = {
-                source: permanentProxySource,
+                source: linkVariantOne,
+                poster: "./poster.png",
                 parentId: "#video-display",
                 width: "100%",
                 height: "100%",
                 autoPlay: true,
-                mute: true, 
+                mute: false,
                 mimeType: "application/x-mpegURL",
                 preload: "auto",
                 playback: {
                     playInline: true,
-                    recycleVideo: true,
-                    crossOrigin: 'anonymous' 
+                    recycleVideo: true
                 }
             };
 
-            // Inject spoofed security headers down to the lower engine HLS engine level
-            playerConfiguration.playback.hlsjsConfig = {
-                enableWorker: true,
-                lowLatencyMode: true,
-                maxBufferLength: 6,
-                liveSyncDurationCount: 3,
-                liveMaxLatencyDurationCount: 5,
-                maxMaxBufferLength: 15,
-                xhrSetup: function(xhr, url) {
-                    xhr.withCredentials = false;
-                    // Inject strict credentials demanded by webcric target platforms
-                    xhr.setRequestHeader('Referer', 'https://go.webcric.com/');
-                    xhr.setRequestHeader('Origin', 'https://go.webcric.com');
-                }
-            };
+            if (!isMobileDevice) {
+                playerConfiguration.playback.hlsjsConfig = {
+                    enableWorker: true,
+                    lowLatencyMode: true,
+                    maxBufferLength: 6,
+                    liveSyncDurationCount: 3,
+                    liveMaxLatencyDurationCount: 5,
+                    maxMaxBufferLength: 15
+                };
+            }
 
             clapprPlayerInstance = new Clappr.Player(playerConfiguration);
 
             clapprPlayerInstance.on(Clappr.Events.PLAYER_ERROR, function() {
-                if(isMobileDevice) {
-                    document.getElementById('mobile-card').style.display = "flex";
+                let currentSource = clapprPlayerInstance.getPlugin('container').options.source;
+                if (currentSource === linkVariantOne && linkVariantOne !== linkVariantTwo) {
+                    console.log("Switching to secondary fallback engine link...");
+                    clapprPlayerInstance.load(linkVariantTwo);
+                    clapprPlayerInstance.play();
+                } else {
+                    if(isMobileDevice) {
+                        document.getElementById('mobile-card').style.display = "flex";
+                    }
                 }
             });
 
