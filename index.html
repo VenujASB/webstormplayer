@@ -223,6 +223,11 @@
             main { padding: 0 0 15px 0; }
             .stream-info { width: 92%; margin-top: 15px; }
         }
+        @media (max-width: 400px) {
+            .mobile-fallback-card h3 { font-size: 0.95rem; }
+            .mobile-fallback-card p { font-size: 0.75rem; }
+            .external-btn { padding: 10px 18px; font-size: 0.75rem; }
+        }
         @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
         @keyframes pulse { 0% { transform: scale(0.9); opacity: 0.6; } 50% { transform: scale(1.1); opacity: 1; box-shadow: 0 0 12px var(--live-green); } 100% { transform: scale(0.9); opacity: 0.6; } }
     </style>
@@ -287,46 +292,22 @@
     <footer>&copy; 2026 WebStorm Player. All rights reserved.</footer>
 
     <script type="text/javascript">
-        // 1. Block Mouse Right-Clicks
-        document.addEventListener('contextmenu', function(e) {
-            e.preventDefault();
-        }, false);
-
-        // 2. Block Core Keyboard Shortcuts (F12, Inspect Elements, Source Reads)
+        document.addEventListener('contextmenu', function(e) { e.preventDefault(); }, false);
         document.addEventListener('keydown', function(e) {
-            if (e.key === "F12" || e.keyCode === 123) {
-                e.preventDefault();
-                return false;
-            }
-            if (e.ctrlKey && e.shiftKey && (e.key === "I" || e.keyCode === 73)) {
-                e.preventDefault();
-                return false;
-            }
-            if (e.ctrlKey && e.shiftKey && (e.key === "J" || e.keyCode === 74)) {
-                e.preventDefault();
-                return false;
-            }
-            if (e.ctrlKey && (e.key === "U" || e.keyCode === 85)) {
-                e.preventDefault();
-                return false;
-            }
-            if (e.ctrlKey && (e.key === "S" || e.keyCode === 83)) {
-                e.preventDefault();
-                return false;
-            }
+            if (e.key === "F12" || e.keyCode === 123) { e.preventDefault(); return false; }
+            if (e.ctrlKey && e.shiftKey && (e.key === "I" || e.keyCode === 73)) { e.preventDefault(); return false; }
+            if (e.ctrlKey && e.shiftKey && (e.key === "J" || e.keyCode === 74)) { e.preventDefault(); return false; }
+            if (e.ctrlKey && (e.key === "U" || e.keyCode === 85)) { e.preventDefault(); return false; }
+            if (e.ctrlKey && (e.key === "S" || e.keyCode === 83)) { e.preventDefault(); return false; }
         }, false);
-
-        // 3. Prevent dragging interface elements
-        document.addEventListener('dragstart', function(e) {
-            e.preventDefault();
-        });
+        document.addEventListener('dragstart', function(e) { e.preventDefault(); });
     </script>
 
     <script>
         let clapprPlayerInstance = null;
         
-        // SWITCHED FROM LINODE MIDDLEMAN TO DIRECT SECURE TARGET ROUTING
-        const permanentProxySource = "https://mut001.myturn1.top:8088/live/webcricwillow/playlist.m3u8?id=120375&pk=aa05930de864cc4a2578a0d8d0982a87fc91b81269359d598db2245365aece68341da41f37dac094b3eaef58b5d8bafb19caec663d46901294d9e41e1be40abf";
+        // 💥 ACTION REQUIRED: Swap the placeholder below with your real Linode public IP address
+        const VPS_API_ENDPOINT = "http://45.79.124.104:5000/get_stream";
 
         function closeInstructions() {
             document.getElementById('popup-modal').style.opacity = '0';
@@ -335,16 +316,35 @@
             setTimeout(() => {
                 document.getElementById('popup-modal').style.display = 'none';
                 if(clapprPlayerInstance) {
-                    clapprPlayerInstance.play().catch(err => console.log("Autoplay forced initialization failed"));
+                    clapprPlayerInstance.play().catch(err => console.log("Autoplay context execution bypassed"));
                 }
             }, 300);
         }
 
-        function startStreamingEngine() {
+        async function startStreamingEngine() {
             const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            let permanentProxySource = "";
+
+            try {
+                // Fetch the fresh harvested URL directly from your micro Flask server
+                const response = await fetch(VPS_API_ENDPOINT);
+                const data = await response.json();
+                
+                if (data.status === "success" && data.url) {
+                    permanentProxySource = data.url;
+                    console.log("🔗 Connection established. Loaded active stream target:", permanentProxySource);
+                } else {
+                    throw new Error("Invalid structure payload from API");
+                }
+            } catch (error) {
+                console.error("❌ Failed fetching payload from harvester system:", error);
+                if(isMobileDevice) {
+                    document.getElementById('mobile-card').style.display = "flex";
+                }
+                return; // Cease execution if source is completely unreachable
+            }
 
             if(isMobileDevice) {
-                // Configures native app intents using the raw link protocol structure
                 document.getElementById('native-app-link').href = "intent://" + permanentProxySource.replace(/^https?:\/\//, "") + "#Intent;scheme=https;type=video/*;end";
                 document.getElementById('vlc-app-link').href = "vlc://" + permanentProxySource.replace(/^https?:\/\//, "");
             }
@@ -355,13 +355,13 @@
                 width: "100%",
                 height: "100%",
                 autoPlay: true,
-                mute: true, // Switched to true to prevent modern browsers from blocking initial load execution
+                mute: true, 
                 mimeType: "application/x-mpegURL",
                 preload: "auto",
                 playback: {
                     playInline: true,
                     recycleVideo: true,
-                    crossOrigin: 'anonymous' // Bypass credentials request layer restrictions
+                    crossOrigin: 'anonymous' 
                 }
             };
 
@@ -374,7 +374,6 @@
                     liveMaxLatencyDurationCount: 5,
                     maxMaxBufferLength: 15,
                     xhrSetup: function(xhr, url) {
-                        // Suppresses standard credential flags that cause Vidict Media Server rejections
                         xhr.withCredentials = false;
                     }
                 };
