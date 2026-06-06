@@ -223,13 +223,6 @@
             main { padding: 0 0 15px 0; }
             .stream-info { width: 92%; margin-top: 15px; }
         }
-        @media (max-width: 400px) {
-            .mobile-fallback-card h3 { font-size: 0.95rem; }
-            .mobile-fallback-card p { font-size: 0.75rem; }
-            .external-btn { padding: 10px 18px; font-size: 0.75rem; }
-        }
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
-        @keyframes pulse { 0% { transform: scale(0.9); opacity: 0.6; } 50% { transform: scale(1.1); opacity: 1; box-shadow: 0 0 12px var(--live-green); } 100% { transform: scale(0.9); opacity: 0.6; } }
     </style>
 </head>
 <body class="modal-active">
@@ -306,7 +299,7 @@
     <script>
         let clapprPlayerInstance = null;
         
-        // 💥 ACTION REQUIRED: Swap the placeholder below with your real Linode public IP address
+        // 🚀 Points directly to your secure proxy wrapper layer
         const VPS_API_ENDPOINT = "https://cors-anywhere.herokuapp.com/http://45.79.124.104:5000/get_stream";
 
         function closeInstructions() {
@@ -326,22 +319,23 @@
             let permanentProxySource = "";
 
             try {
-                // Fetch the fresh harvested URL directly from your micro Flask server
-                const response = await fetch(VPS_API_ENDPOINT);
+                const response = await fetch(VPS_API_ENDPOINT, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
                 const data = await response.json();
                 
                 if (data.status === "success" && data.url) {
                     permanentProxySource = data.url;
-                    console.log("🔗 Connection established. Loaded active stream target:", permanentProxySource);
+                    console.log("🔗 Active stream target registered:", permanentProxySource);
                 } else {
-                    throw new Error("Invalid structure payload from API");
+                    throw new Error("Missing payload stream data key configurations");
                 }
             } catch (error) {
                 console.error("❌ Failed fetching payload from harvester system:", error);
                 if(isMobileDevice) {
                     document.getElementById('mobile-card').style.display = "flex";
                 }
-                return; // Cease execution if source is completely unreachable
+                return;
             }
 
             if(isMobileDevice) {
@@ -365,19 +359,21 @@
                 }
             };
 
-            if (!isMobileDevice) {
-                playerConfiguration.playback.hlsjsConfig = {
-                    enableWorker: true,
-                    lowLatencyMode: true,
-                    maxBufferLength: 6,
-                    liveSyncDurationCount: 3,
-                    liveMaxLatencyDurationCount: 5,
-                    maxMaxBufferLength: 15,
-                    xhrSetup: function(xhr, url) {
-                        xhr.withCredentials = false;
-                    }
-                };
-            }
+            // Inject spoofed security headers down to the lower engine HLS engine level
+            playerConfiguration.playback.hlsjsConfig = {
+                enableWorker: true,
+                lowLatencyMode: true,
+                maxBufferLength: 6,
+                liveSyncDurationCount: 3,
+                liveMaxLatencyDurationCount: 5,
+                maxMaxBufferLength: 15,
+                xhrSetup: function(xhr, url) {
+                    xhr.withCredentials = false;
+                    // Inject strict credentials demanded by webcric target platforms
+                    xhr.setRequestHeader('Referer', 'https://go.webcric.com/');
+                    xhr.setRequestHeader('Origin', 'https://go.webcric.com');
+                }
+            };
 
             clapprPlayerInstance = new Clappr.Player(playerConfiguration);
 
