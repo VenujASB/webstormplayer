@@ -15,12 +15,15 @@
       gtag('config', 'G-FRTBSRJGT0');
     </script>
     
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@clappr/player@latest/dist/clappr.min.js"></script>
+    
     <style>
         * { 
             margin: 0; 
             padding: 0; 
             box-sizing: border-box; 
             -webkit-tap-highlight-color: transparent; 
+            /* Anti-copy/Anti-selection style layer */
             -webkit-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
@@ -79,52 +82,56 @@
             padding: 15px; 
             transition: filter 0.3s ease;
         }
-        
-        /* 🛠️ REPLACED BROKEN IFRAME BOX WITH AN AD-FREE ACTION CONTROLLER */
         .player-container {
             width: 100%;
-            background-color: var(--panel-color);
+            background-color: #000;
             border-radius: 8px; 
-            overflow: hidden; 
+            overflow: hidden;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            border: 2px dashed #2c3243;
-            aspect-ratio: 16 / 9; 
+            border: 1px solid #2c3243;
+            aspect-ratio: 16 / 9;
             position: relative;
-            display: flex;
+        }
+        #video-display { width: 100%; height: 100%; }
+        
+        .mobile-fallback-card {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1b202e 0%, #11141a 100%);
             flex-direction: column;
             justify-content: center;
             align-items: center;
             padding: 20px;
             text-align: center;
+            z-index: 50;
         }
-
-        .fallback-icon {
-            font-size: 3.5rem;
-            margin-bottom: 15px;
-            animation: pulse 2s infinite;
-        }
-
-        .launch-btn {
-            background-color: var(--primary-color);
+        .mobile-fallback-card h3 { font-size: 1.1rem; color: #fff; margin-bottom: 8px; }
+        .mobile-fallback-card p { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 15px; max-width: 85%; }
+        
+        .external-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 24px;
+            background-color: #2ed573;
             color: white;
-            border: none;
-            padding: 14px 35px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            border-radius: 50px;
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            box-shadow: 0 6px 20px rgba(255, 71, 87, 0.4);
-            transition: transform 0.2s ease, background-color 0.2s ease;
             text-decoration: none;
-            display: inline-block;
-            margin-top: 10px;
+            font-weight: bold;
+            border-radius: 5px;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            box-shadow: 0 4px 15px rgba(46, 213, 115, 0.4);
+            margin-bottom: 10px;
+            width: 80%;
+            max-width: 280px;
+            border: none;
+            cursor: pointer;
         }
-        .launch-btn:hover {
-            transform: scale(1.03);
-            background-color: #ff6b81;
-        }
+        .external-btn.vlc { background-color: #ff9f43; box-shadow: 0 4px 15px rgba(255, 159, 67, 0.4); }
 
         .stream-info {
             width: 100%;
@@ -223,22 +230,22 @@
 
     <div class="modal-overlay" id="popup-modal">
         <div class="instruction-modal">
-            <div class="modal-title"><span>🏏</span> WebStorm Live</div>
+            <div class="modal-title"><span>⚠️</span> Streaming Instructions</div>
             <div class="modal-body">
                 <div class="modal-item">
-                    <span class="modal-icon">🚀</span>
-                    <p><b>Anti-Block Protection:</b> To bypass video-blocking errors, click the launch button to open the live match directly.</p>
-                </div>
-                <div class="modal-item">
                     <span class="modal-icon">📶</span>
-                    <p><b>Connection Stability:</b> Please use Wi-Fi to watch the stream. Using mobile data may cause playback errors or lag.</p>
+                    <p><b>Use Wi-Fi Connection:</b> Please use Wi-Fi to watch the stream. Using mobile data may cause playback errors or lag.</p>
                 </div>
                 <div class="modal-item">
                     <span class="modal-icon">🔄</span>
-                    <p><b>No Maintenance:</b> This setup auto-renews links natively. You will never need to update the source code manually.</p>
+                    <p><b>Lagging Issues:</b> If the video stream buffers or freezes up, kindly <b>reload / refresh</b> your browser page.</p>
+                </div>
+                <div class="modal-item">
+                    <span class="modal-icon">🎧</span>
+                    <p><b>Audio Muted:</b> Browsers block auto-playing sound. If there's no sound, just tap the speaker button inside the player dashboard.</p>
                 </div>
             </div>
-            <button class="modal-btn" onclick="closeInstructions()">Open Dashboard</button>
+            <button class="modal-btn" onclick="closeInstructions()">Got It, Let's Watch!</button>
         </div>
     </div>
 
@@ -249,13 +256,15 @@
 
     <main>
         <div class="player-container">
-            <div class="fallback-icon">🏏</div>
-            <p style="font-weight: 600; font-size: 1.1rem; margin-bottom: 5px;">Secure Stream Channel Ready</p>
-            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px; max-width: 400px;">Bypasses embedding blocks, hidden trackers, and background popup layouts automatically.</p>
+            <div id="video-display"></div>
             
-            <a href="https://go.webcric.com/watch-west-indies-vs-sri-lanka-on-willow-live-cricket-streaming.htm" target="_blank" class="launch-btn">
-                Launch Live Stream ⚡
-            </a>
+            <div id="mobile-card" class="mobile-fallback-card">
+                <h3>📱 Mobile Streaming Engine</h3>
+                <p>Mobile web browsers block this network token stream. Tap below to stream directly inside your device players without ads or limits:</p>
+                
+                <a id="native-app-link" href="#" class="external-btn">▶️ Play in Device Player</a>
+                <a id="vlc-app-link" href="#" class="external-btn vlc">🧡 Open in VLC Mobile</a>
+            </div>
         </div>
 
         <div class="stream-info">
@@ -277,26 +286,140 @@
     <footer>&copy; 2026 WebStorm Player. All rights reserved.</footer>
 
     <script type="text/javascript">
-        document.addEventListener('contextmenu', e => e.preventDefault());
+        // 1. Block Mouse Right-Clicks
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        }, false);
+
+        // 2. Block Core Keyboard Shortcuts (F12, Inspect Elements, Source Reads)
         document.addEventListener('keydown', function(e) {
-            if (e.key === "F12" || e.keyCode === 123 || (e.ctrlKey && e.shiftKey && [73, 74].includes(e.keyCode)) || (e.ctrlKey && [85, 83].includes(e.keyCode))) {
+            // Block F12
+            if (e.key === "F12" || e.keyCode === 123) {
                 e.preventDefault();
                 return false;
             }
+            // Block Ctrl+Shift+I (Inspect)
+            if (e.ctrlKey && e.shiftKey && (e.key === "I" || e.keyCode === 73)) {
+                e.preventDefault();
+                return false;
+            }
+            // Block Ctrl+Shift+J (Console)
+            if (e.ctrlKey && e.shiftKey && (e.key === "J" || e.keyCode === 74)) {
+                e.preventDefault();
+                return false;
+            }
+            // Block Ctrl+U (View Page Source)
+            if (e.ctrlKey && (e.key === "U" || e.keyCode === 85)) {
+                e.preventDefault();
+                return false;
+            }
+            // Block Ctrl+S (Save Page)
+            if (e.ctrlKey && (e.key === "S" || e.keyCode === 83)) {
+                e.preventDefault();
+                return false;
+            }
+        }, false);
+
+        // 3. Prevent dragging interface elements
+        document.addEventListener('dragstart', function(e) {
+            e.preventDefault();
         });
-        document.addEventListener('dragstart', e => e.preventDefault());
     </script>
 
     <script>
+        let clapprPlayerInstance = null;
+        let linkVariantOne = "";
+        let linkVariantTwo = "";
+
         function closeInstructions() {
             document.getElementById('popup-modal').style.opacity = '0';
             document.body.classList.remove('modal-active');
             
             setTimeout(() => {
                 document.getElementById('popup-modal').style.display = 'none';
+                if(clapprPlayerInstance) {
+                    clapprPlayerInstance.play().catch(err => console.log("Autoplay context initialization caught"));
+                }
             }, 300);
         }
 
+        async function startStreamingEngine() {
+            const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+            try {
+                const response = await fetch('/api/stream');
+                const data = await response.json();
+                linkVariantOne = data.streamLinkOne;
+                linkVariantTwo = data.streamLinkTwo;
+            } catch (err) {
+                console.error("API link delivery failed, running internal fallbacks");
+            }
+
+            if(isMobileDevice && linkVariantOne) {
+                document.getElementById('native-app-link').href = linkVariantOne;
+                document.getElementById('vlc-app-link').href = "vlc://" + linkVariantOne.replace(/^https?:\/\//, "");
+            }
+
+            let playerConfiguration = {
+                source: linkVariantOne,
+                poster: "./poster.png",
+                parentId: "#video-display",
+                width: "100%",
+                height: "100%",
+                autoPlay: true,
+                mute: false,
+                mimeType: "application/x-mpegURL",
+                preload: "auto",
+                playback: {
+                    playInline: true,
+                    recycleVideo: true
+                }
+            };
+
+            if (!isMobileDevice) {
+                playerConfiguration.playback.hlsjsConfig = {
+                    enableWorker: true,
+                    lowLatencyMode: true,
+                    maxBufferLength: 6,
+                    liveSyncDurationCount: 3,
+                    liveMaxLatencyDurationCount: 5,
+                    maxMaxBufferLength: 15
+                };
+            }
+
+            clapprPlayerInstance = new Clappr.Player(playerConfiguration);
+
+            clapprPlayerInstance.on(Clappr.Events.PLAYER_ERROR, function() {
+                let currentSource = clapprPlayerInstance.getPlugin('container').options.source;
+                if (currentSource === linkVariantOne && linkVariantOne !== linkVariantTwo) {
+                    console.log("Switching to secondary fallback engine link...");
+                    clapprPlayerInstance.load(linkVariantTwo);
+                    clapprPlayerInstance.play();
+                } else {
+                    if(isMobileDevice) {
+                        document.getElementById('mobile-card').style.display = "flex";
+                    }
+                }
+            });
+
+            clapprPlayerInstance.on(Clappr.Events.PLAYER_PLAY, function() {
+                const videoElement = document.querySelector('#video-display video');
+                if (videoElement) {
+                    videoElement.addEventListener('waiting', () => {
+                        setTimeout(() => {
+                            if (videoElement.paused === false) {
+                                videoElement.currentTime = videoElement.currentTime + 0.5;
+                            }
+                        }, 2000); 
+                    });
+                }
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", startStreamingEngine);
+    </script>
+
+    <script>
         function updateLiveViewers() {
             const baseTraffic = 145; 
             const variance = Math.floor(Math.random() * 40) - 20; 
