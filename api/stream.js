@@ -13,8 +13,8 @@ export default async function handler(req, res) {
     };
 
     // Hardcoded default fallback links from your script
-    let streamLinkOne = "https://plu001.myturn1.top:8088/live/webcricwillow/playlist.m3u8?id=120375&pk=b492b8a26cc718f90aaebf57bba20175f0399f7320faa530e542f2fd63bbcb570f11a2774d26748366815b720f13fa570e91a633b43a37b27283a47bac86c0b8";
-    let streamLinkTwo = "https://muc001.myturn1.top:8088/live/webcricwillow/playlist.m3u8?id=120375&pk=b492b8a26cc718f90aaebf57bba20175f0399f7320faa530e542f2fd63bbcb570f11a2774d26748366815b720f13fa570e91a633b43a37b27283a47bac86c0b8";
+    let streamLinkOne = "https://mut001.myturn1.top:8088/live/webcricwillow/playlist.m3u8?vidictid=206124176774&id=120375&pk=fecb40531f0cf96ea49000a6d638e47cd19c77ec1d58902b8f04c1733831e87035a9fb5a485a71b44eb0a4492c9ce9bfc788f2c5fdafb6bb4abd8c6baf7ecb74";
+    let streamLinkTwo = "https://mut001.myturn1.top:8088/live/webcricwillow/playlist.m3u8?id=120375&pk=fecb40531f0cf96ea49000a6d638e47cd19c77ec1d58902b8f04c1733831e87035a9fb5a485a71b44eb0a4492c9ce9bfc788f2c5fdafb6bb4abd8c6baf7ecb74";
 
     try {
         const watchPageResponse = await fetch(watchPageUrl, requestOptions);
