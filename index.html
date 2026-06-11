@@ -272,7 +272,7 @@
             
             <div class="viewer-count">
                 <span class="pulse-dot"></span>
-                <span id="view-number">1</span> watching live
+                <span id="view-number">145</span> watching live
             </div>
             <br><br>
 
@@ -286,51 +286,46 @@
     <footer>&copy; 2026 WebStorm Player. All rights reserved.</footer>
 
     <script type="text/javascript">
-        // 1. Block Mouse Right-Clicks
+        // Global variables for links and instances
+        let clapprPlayerInstance = null;
+        
+        // Pointing directly to your active Central India Azure Pipeline Instance
+        const linkVariantOne = "http://98.70.27.136:3000/live.m3u8";
+        const linkVariantTwo = "http://98.70.27.136:3000/live.m3u8"; 
+
+        // 1. Anti-Developer Tools & Context Protections
         document.addEventListener('contextmenu', function(e) {
             e.preventDefault();
         }, false);
 
-        // 2. Block Core Keyboard Shortcuts (F12, Inspect Elements, Source Reads)
         document.addEventListener('keydown', function(e) {
-            // Block F12
             if (e.key === "F12" || e.keyCode === 123) {
                 e.preventDefault();
                 return false;
             }
-            // Block Ctrl+Shift+I (Inspect)
             if (e.ctrlKey && e.shiftKey && (e.key === "I" || e.keyCode === 73)) {
                 e.preventDefault();
                 return false;
             }
-            // Block Ctrl+Shift+J (Console)
             if (e.ctrlKey && e.shiftKey && (e.key === "J" || e.keyCode === 74)) {
                 e.preventDefault();
                 return false;
             }
-            // Block Ctrl+U (View Page Source)
             if (e.ctrlKey && (e.key === "U" || e.keyCode === 85)) {
                 e.preventDefault();
                 return false;
             }
-            // Block Ctrl+S (Save Page)
             if (e.ctrlKey && (e.key === "S" || e.keyCode === 83)) {
                 e.preventDefault();
                 return false;
             }
         }, false);
 
-        // 3. Prevent dragging interface elements
         document.addEventListener('dragstart', function(e) {
             e.preventDefault();
         });
-    </script>
 
-    <script>
-        let clapprPlayerInstance = null;
-        let linkVariantOne = "";
-        let linkVariantTwo = "";
-
+        // 2. Control Layout Animations
         function closeInstructions() {
             document.getElementById('popup-modal').style.opacity = '0';
             document.body.classList.remove('modal-active');
@@ -338,22 +333,14 @@
             setTimeout(() => {
                 document.getElementById('popup-modal').style.display = 'none';
                 if(clapprPlayerInstance) {
-                    clapprPlayerInstance.play().catch(err => console.log("Autoplay context initialization caught"));
+                    clapprPlayerInstance.play().catch(err => console.log("User action pending for audio decoding rules"));
                 }
             }, 300);
         }
 
-        async function startStreamingEngine() {
+        // 3. Execution Engine Setup
+        function startStreamingEngine() {
             const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
-            try {
-                const response = await fetch('/api/stream');
-                const data = await response.json();
-                linkVariantOne = data.streamLinkOne;
-                linkVariantTwo = data.streamLinkTwo;
-            } catch (err) {
-                console.error("API link delivery failed, running internal fallbacks");
-            }
 
             if(isMobileDevice && linkVariantOne) {
                 document.getElementById('native-app-link').href = linkVariantOne;
@@ -390,9 +377,10 @@
             clapprPlayerInstance = new Clappr.Player(playerConfiguration);
 
             clapprPlayerInstance.on(Clappr.Events.PLAYER_ERROR, function() {
-                let currentSource = clapprPlayerInstance.getPlugin('container').options.source;
+                // Securely read active pipeline options from player core context
+                let currentSource = clapprPlayerInstance.core.getCurrentContainer().options.source;
                 if (currentSource === linkVariantOne && linkVariantOne !== linkVariantTwo) {
-                    console.log("Switching to secondary fallback engine link...");
+                    console.log("Switching to secondary layout configuration...");
                     clapprPlayerInstance.load(linkVariantTwo);
                     clapprPlayerInstance.play();
                 } else {
@@ -416,18 +404,20 @@
             });
         }
 
-        document.addEventListener("DOMContentLoaded", startStreamingEngine);
-    </script>
-
-    <script>
+        // 4. Fake Viewer Counter Script
         function updateLiveViewers() {
             const baseTraffic = 145; 
             const variance = Math.floor(Math.random() * 40) - 20; 
             const currentViewers = Math.max(80, baseTraffic + variance);
             document.getElementById('view-number').innerText = currentViewers.toLocaleString();
         }
-        updateLiveViewers();
-        setInterval(updateLiveViewers, 4000);
+
+        // Single entry point on load
+        document.addEventListener("DOMContentLoaded", () => {
+            startStreamingEngine();
+            updateLiveViewers();
+            setInterval(updateLiveViewers, 4000);
+        });
     </script>
 </body>
 </html>
