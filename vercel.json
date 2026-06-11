@@ -1,7 +1,8 @@
 {
-  "version": 2,
   "rewrites": [
-    { "source": "/", "destination": "/index.html" },
-    { "source": "/api/stream", "destination": "/api/stream.js" }
+    {
+      "source": "/stream-pipeline/:path*",
+      "destination": "http://98.70.27.136:3000/:path*"
+    }
   ]
 }
