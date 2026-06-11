@@ -288,16 +288,9 @@
     <script type="text/javascript">
         let clapprPlayerInstance = null;
         
-        // Base API Target definition
-        const backendHost = "98.70.27.136:3000";
-        
-        // Auto-detect secure layer context to avoid Mixed Content layout blocks
-        const useSecureLayer = window.location.protocol === 'https:';
-        const streamingProtocol = useSecureLayer ? "https://" : "http://";
-        
-        // Constructed final stream parameters
-        const linkVariantOne = streamingProtocol + backendHost + "/live.m3u8";
-        const linkVariantTwo = streamingProtocol + backendHost + "/live.m3u8"; 
+        // Final stream paths routed cleanly through the Vercel Reverse Proxy
+        const linkVariantOne = "/api/stream/live.m3u8";
+        const linkVariantTwo = "/api/stream/live.m3u8"; 
 
         // 1. Context Protections
         document.addEventListener('contextmenu', e => e.preventDefault(), false);
@@ -327,9 +320,11 @@
         function startStreamingEngine() {
             const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-            if(isMobileDevice && linkVariantOne) {
-                document.getElementById('native-app-link').href = linkVariantOne;
-                document.getElementById('vlc-app-link').href = "vlc://" + linkVariantOne.replace(/^https?:\/\//, "");
+            if(isMobileDevice) {
+                // Generates an absolute URL string based on Vercel's current domain profile 
+                const fallbackAbsoluteUrl = window.location.origin + linkVariantOne;
+                document.getElementById('native-app-link').href = fallbackAbsoluteUrl;
+                document.getElementById('vlc-app-link').href = "vlc://" + fallbackAbsoluteUrl.replace(/^https?:\/\//, "");
             }
 
             let playerConfiguration = {
