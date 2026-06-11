@@ -260,7 +260,7 @@
             
             <div id="mobile-card" class="mobile-fallback-card">
                 <h3>📱 Mobile Streaming Engine</h3>
-                <p>Mobile web browsers block this network token stream. Tap below to stream directly inside your device players without ads or limits:</p>
+                <p>Mobile web browsers may block this stream context layout. Tap below to stream directly inside your device players without ads or limits:</p>
                 
                 <a id="native-app-link" href="#" class="external-btn">▶️ Play in Device Player</a>
                 <a id="vlc-app-link" href="#" class="external-btn vlc">🧡 Open in VLC Mobile</a>
@@ -277,7 +277,7 @@
             <br><br>
 
             <h3>Upcoming:</h3>
-            <h2>3rd ODI, Tue 09 Jun, 2026, @1:00 AM</h2><br>
+            <h2>3rd ODI, Tue 16 Jun, 2026, @1:00 AM</h2><br>
             <p><i>This is a simple website for all Sri Lankan supporters to view ODI and T20 series. If you notice lag, kindly refresh your browser.</i></p><br>
             <p><b>Crafted with ❤️ for cricket lovers! Developed by Venuja.</b></p>
         </div>
@@ -286,44 +286,29 @@
     <footer>&copy; 2026 WebStorm Player. All rights reserved.</footer>
 
     <script type="text/javascript">
-        // Global variables for links and instances
         let clapprPlayerInstance = null;
         
-        // Pointing directly to your active Central India Azure Pipeline Instance
-        const linkVariantOne = "http://98.70.27.136:3000/live.m3u8";
-        const linkVariantTwo = "http://98.70.27.136:3000/live.m3u8"; 
+        // Base API Target definition
+        const backendHost = "98.70.27.136:3000";
+        
+        // Auto-detect secure layer context to avoid Mixed Content layout blocks
+        const useSecureLayer = window.location.protocol === 'https:';
+        const streamingProtocol = useSecureLayer ? "https://" : "http://";
+        
+        // Constructed final stream parameters
+        const linkVariantOne = streamingProtocol + backendHost + "/live.m3u8";
+        const linkVariantTwo = streamingProtocol + backendHost + "/live.m3u8"; 
 
-        // 1. Anti-Developer Tools & Context Protections
-        document.addEventListener('contextmenu', function(e) {
-            e.preventDefault();
-        }, false);
-
+        // 1. Context Protections
+        document.addEventListener('contextmenu', e => e.preventDefault(), false);
         document.addEventListener('keydown', function(e) {
-            if (e.key === "F12" || e.keyCode === 123) {
-                e.preventDefault();
-                return false;
-            }
-            if (e.ctrlKey && e.shiftKey && (e.key === "I" || e.keyCode === 73)) {
-                e.preventDefault();
-                return false;
-            }
-            if (e.ctrlKey && e.shiftKey && (e.key === "J" || e.keyCode === 74)) {
-                e.preventDefault();
-                return false;
-            }
-            if (e.ctrlKey && (e.key === "U" || e.keyCode === 85)) {
-                e.preventDefault();
-                return false;
-            }
-            if (e.ctrlKey && (e.key === "S" || e.keyCode === 83)) {
-                e.preventDefault();
-                return false;
-            }
+            if (e.key === "F12" || e.keyCode === 123) return e.preventDefault();
+            if (e.ctrlKey && e.shiftKey && (e.key === "I" || e.keyCode === 73)) return e.preventDefault();
+            if (e.ctrlKey && e.shiftKey && (e.key === "J" || e.keyCode === 74)) return e.preventDefault();
+            if (e.ctrlKey && (e.key === "U" || e.keyCode === 85)) return e.preventDefault();
+            if (e.ctrlKey && (e.key === "S" || e.keyCode === 83)) return e.preventDefault();
         }, false);
-
-        document.addEventListener('dragstart', function(e) {
-            e.preventDefault();
-        });
+        document.addEventListener('dragstart', e => e.preventDefault());
 
         // 2. Control Layout Animations
         function closeInstructions() {
@@ -333,7 +318,7 @@
             setTimeout(() => {
                 document.getElementById('popup-modal').style.display = 'none';
                 if(clapprPlayerInstance) {
-                    clapprPlayerInstance.play().catch(err => console.log("User action pending for audio decoding rules"));
+                    clapprPlayerInstance.play();
                 }
             }, 300);
         }
@@ -349,7 +334,6 @@
 
             let playerConfiguration = {
                 source: linkVariantOne,
-                poster: "./poster.png",
                 parentId: "#video-display",
                 width: "100%",
                 height: "100%",
@@ -377,7 +361,6 @@
             clapprPlayerInstance = new Clappr.Player(playerConfiguration);
 
             clapprPlayerInstance.on(Clappr.Events.PLAYER_ERROR, function() {
-                // Securely read active pipeline options from player core context
                 let currentSource = clapprPlayerInstance.core.getCurrentContainer().options.source;
                 if (currentSource === linkVariantOne && linkVariantOne !== linkVariantTwo) {
                     console.log("Switching to secondary layout configuration...");
