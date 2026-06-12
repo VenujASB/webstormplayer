@@ -113,6 +113,60 @@
         }
         #video-display { width: 100%; height: 100%; }
         
+        /* --- START OF CUSTOM CLAPPR OVERRIDES --- */
+        /* Center the play/pause wrapper across all viewports (including mobile view) */
+        #video-display [data-player] .media-control .media-control-layer[data-controls] {
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+        }
+
+        #video-display [data-player] .media-control .media-control-layer[data-controls] .media-control-left-panel {
+            float: none !important;
+            display: inline-flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            position: absolute !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+        }
+
+        /* Customize and emphasize the centrally forced play/pause button layout */
+        #video-display [data-player] .media-control [data-playpause] {
+            width: 65px !important;
+            height: 65px !important;
+            background: rgba(15, 23, 42, 0.85) !important;
+            border: 2px solid var(--primary-color) !important;
+            border-radius: 50% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            box-shadow: 0 0 20px var(--primary-glow) !important;
+            transition: transform 0.2s ease !important;
+        }
+
+        #video-display [data-player] .media-control [data-playpause] svg {
+            width: 26px !important;
+            height: 26px !important;
+            fill: #ffffff !important;
+        }
+
+        /* Show the poster background placeholder when the stream is paused */
+        #video-display [data-player] .poster[data-poster] {
+            display: block !important;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease-in-out !important;
+        }
+
+        #video-display [data-player].paused .poster[data-poster] {
+            opacity: 1 !important;
+            pointer-events: auto;
+            z-index: 1 !important;
+        }
+        /* --- END OF CUSTOM CLAPPR OVERRIDES --- */
+        
         .mobile-fallback-card {
             display: none;
             position: absolute;
@@ -388,6 +442,8 @@
                 mute: false,
                 mimeType: "application/x-mpegURL",
                 preload: "auto",
+                // Added a premium cricket poster image placeholder here:
+                poster: "https://images.unsplash.com/photo-1531415074968-036ba1b575da?q=80&w=1200",
                 playback: {
                     playInline: true,
                     recycleVideo: true
