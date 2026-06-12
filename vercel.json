@@ -1,9 +1,3 @@
 {
-  "version": 2,
-  "rewrites": [
-    {
-      "source": "/api/stream/:path*",
-      "destination": "http://98.70.27.136:3000/:path*"
-    }
-  ]
+  "cleanUrls": true
 }
