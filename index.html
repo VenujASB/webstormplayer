@@ -3,13 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Live Sports Stream - WebStorm Pro</title>
-    
-    <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#0b0f17">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="manifest" href="manifest.json">
+    <title>Live Sports Stream - WebStorm</title>
     
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='40' fill='%23ff4757'/%3E%3C/svg%3E">
     
@@ -29,6 +23,10 @@
             padding: 0; 
             box-sizing: border-box; 
             -webkit-tap-highlight-color: transparent; 
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
         :root {
             --bg-color: #0b0f17;
@@ -81,37 +79,35 @@
             gap: 5px;
             box-shadow: 0 0 12px var(--primary-glow);
         }
+        .live-indicator::before {
+            content: '';
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background: #fff;
+            border-radius: 50%;
+            animation: pulse-white 1.5s infinite;
+        }
 
-        /* Dual Column Layout Grid */
-        .app-layout-grid {
-            display: grid;
-            grid-template-columns: 1fr 380px;
-            gap: 24px;
-            max-width: 1400px;
-            width: 100%;
-            margin: 0 auto;
-            padding: 24px 20px;
+        main {
             flex: 1;
-        }
-
-        .left-column {
             display: flex;
             flex-direction: column;
+            width: 100%;
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 20px 16px; 
             gap: 20px;
-        }
-
-        .right-column {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            height: fit-content;
+            transition: filter 0.3s ease;
         }
         
+        /* Layout wrapper keeping player exactly centered with space below navbar */
         .player-alignment-wrapper {
             width: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
+            margin-top: 25px; 
         }
 
         .player-container {
@@ -119,228 +115,212 @@
             background-color: #000;
             border-radius: 12px; 
             overflow: hidden;
-            box-shadow: 0 20px 40px -15px rgba(0,0,0,0.7);
+            box-shadow: 0 20px 40px -15px rgba(0,0,0,0.7), 0 0 30px rgba(59, 130, 246, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.08);
             aspect-ratio: 16 / 9;
             position: relative;
         }
         #video-display { width: 100%; height: 100%; }
-
-        /* Stream Status Indicator Overlay */
-        .stream-status-overlay {
+        
+        .mobile-fallback-card {
+            display: none;
             position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: #0f172a;
-            display: flex;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #131926 0%, #0b0f17 100%);
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 10;
+            padding: 24px;
             text-align: center;
-            padding: 20px;
+            z-index: 50;
         }
-        .stream-status-overlay .status-icon { font-size: 3rem; margin-bottom: 12px; animation: bounce 2s infinite; }
-        .stream-status-overlay h3 { font-size: 1.25rem; margin-bottom: 6px; color: #fff; }
-        .stream-status-overlay p { color: var(--text-muted); font-size: 0.9rem; }
+        .mobile-fallback-card h3 { font-size: 1.2rem; font-weight: 700; color: #fff; margin-bottom: 8px; }
+        .mobile-fallback-card p { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px; max-width: 80%; line-height: 1.4; }
         
-        /* Emoji Reaction Bar Layout */
-        .reaction-bar-box {
-            display: flex;
-            justify-content: space-around;
+        .external-btn {
+            display: inline-flex;
             align-items: center;
-            background: var(--panel-color);
-            border: 1px solid var(--panel-border);
-            padding: 12px;
-            border-radius: 12px;
+            justify-content: center;
             gap: 8px;
-        }
-        .reaction-btn {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            font-size: 1.5rem;
-            padding: 8px 16px;
-            border-radius: 30px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            color: #fff;
-            font-size: 1.1rem;
-            transition: transform 0.1s ease, background 0.2s;
-        }
-        .reaction-btn:hover { background: rgba(255, 255, 255, 0.1); transform: scale(1.05); }
-        .reaction-btn:active { transform: scale(0.95); }
-        .reaction-counter { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; }
-
-        /* Floating Animation Elements */
-        .floating-emoji {
-            position: fixed;
-            bottom: 80px;
-            font-size: 2.5rem;
-            pointer-events: none;
-            z-index: 9999;
-            animation: floatUpAndFade 2s forwards ease-out;
-        }
-
-        /* Widgets Card Blocks */
-        .widget-card {
-            background: var(--panel-color);
-            border-radius: 12px;
-            border: 1px solid var(--panel-border);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-        .widget-header {
-            padding: 12px 16px;
-            background: rgba(15, 23, 42, 0.4);
-            border-bottom: 1px solid var(--panel-border);
-            font-size: 0.85rem;
+            padding: 12px 28px;
+            background: linear-gradient(135deg, #2ed573 0%, #26af5f 100%);
+            color: white;
+            text-decoration: none;
             font-weight: 700;
+            border-radius: 8px;
+            font-size: 0.85rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            color: var(--accent-blue);
+            box-shadow: 0 4px 15px rgba(46, 213, 115, 0.25);
+            margin-bottom: 12px;
+            width: 85%;
+            max-width: 280px;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
+        .external-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(46, 213, 115, 0.35); }
+        .external-btn.vlc { background: linear-gradient(135deg, #ff9f43 0%, #f38a2b 100%); box-shadow: 0 4px 15px rgba(255, 159, 67, 0.25); }
+        .external-btn.vlc:hover { box-shadow: 0 6px 20px rgba(255, 159, 67, 0.35); }
 
-        /* Live Chat Widget Box */
-        .chat-iframe-container {
-            height: 380px;
+        .stream-info {
             width: 100%;
-            background: #090d14;
-        }
-        .chat-iframe-container iframe { width: 100%; height: 100%; border: none; }
-
-        /* Interactive Prediction Poll Layout */
-        .poll-wrapper { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-        .poll-question { font-size: 0.95rem; font-weight: 600; color: #fff; }
-        .poll-option-btn {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.06);
-            padding: 10px 14px;
-            border-radius: 8px;
-            color: #fff;
-            text-align: left;
-            font-size: 0.85rem;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            justify-content: space-between;
-            transition: background 0.2s;
-        }
-        .poll-option-btn:hover { background: rgba(255,255,255,0.07); }
-        .poll-fill-bar {
-            position: absolute;
-            top: 0; left: 0; height: 100%;
-            background: rgba(59, 130, 246, 0.15);
-            width: 0%;
-            transition: width 0.5s ease;
-            z-index: 1;
-        }
-        .poll-txt { position: relative; z-index: 2; }
-
-        /* Tour Accordion Schedule Styling */
-        .accordion-item { border-bottom: 1px solid var(--panel-border); }
-        .accordion-item:last-child { border-bottom: none; }
-        .accordion-header {
-            padding: 14px 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            background: rgba(255,255,255,0.01);
-        }
-        .accordion-title { font-size: 0.9rem; font-weight: 600; }
-        .accordion-icon { font-size: 0.8rem; color: var(--text-muted); transition: transform 0.2s; }
-        .accordion-content {
-            max-height: 0; overflow: hidden; transition: max-height 0.2s ease-out;
-            background: rgba(0,0,0,0.15);
-            padding: 0 16px;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-        .accordion-item.active .accordion-icon { transform: rotate(180deg); }
-        .accordion-item.active .accordion-content { padding: 12px 16px; max-height: 120px; }
-        .badge-status { padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
-        .badge-status.win { background: rgba(46, 213, 115, 0.15); color: var(--live-green); }
-        .badge-status.up { background: rgba(59, 130, 246, 0.15); color: var(--accent-blue); }
-
-        /* Highlights Video Grid Layout */
-        .highlights-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 16px;
-            margin-top: 10px;
-        }
-        .video-card {
-            background: rgba(255,255,255,0.02);
+            background: var(--panel-color);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            padding: 20px;
+            border-radius: 12px;
             border: 1px solid var(--panel-border);
-            border-radius: 8px;
-            overflow: hidden;
         }
-        .video-iframe-wrap { aspect-ratio: 16/9; width: 100%; }
-        .video-iframe-wrap iframe { width: 100%; height: 100%; border: none; }
-        .video-details { padding: 10px; font-size: 0.85rem; font-weight: 600; color: #fff; }
+        .stream-info h2 { font-size: 1.25rem; font-weight: 700; line-height: 1.3; color: #fff; }
+        
+        .info-metrics-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 12px;
+        }
 
-        /* Existing Styles Retained */
-        .stream-info { background: var(--panel-color); padding: 20px; border-radius: 12px; border: 1px solid var(--panel-border); }
-        .stream-info h2 { font-size: 1.25rem; font-weight: 700; color: #fff; }
-        .info-metrics-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-top: 12px; }
-        .viewer-count { display: inline-flex; align-items: center; background: rgba(46, 213, 115, 0.06); border: 1px solid rgba(46, 213, 115, 0.15); color: #fff; padding: 6px 14px; border-radius: 30px; font-size: 0.8rem; font-weight: 600; }
-        .pulse-dot { width: 8px; height: 8px; background-color: var(--live-green); border-radius: 50%; margin-right: 8px; animation: pulse-green 1.5s infinite; }
-        .match-countdown-ticker { background: rgba(255, 71, 87, 0.08); border: 1px solid rgba(255, 71, 87, 0.2); color: #ff4757; padding: 6px 14px; border-radius: 30px; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.5px; }
+        .viewer-count {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(46, 213, 115, 0.06);
+            border: 1px solid rgba(46, 213, 115, 0.15);
+            color: #fff;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--live-green);
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse-green 1.5s infinite;
+        }
+        
+        .match-countdown-ticker {
+            background: rgba(255, 71, 87, 0.08);
+            border: 1px solid rgba(255, 71, 87, 0.2);
+            color: #ff4757;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 0.5px;
+        }
+        
+        .schedule-box {
+            margin-top: 24px;
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 10px;
+            padding: 16px;
+        }
+        .schedule-box h4 { font-size: 0.75rem; text-transform: uppercase; color: var(--accent-blue); letter-spacing: 1px; margin-bottom: 10px; font-weight: 800; }
+        .schedule-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .match-teams { font-size: 1.05rem; font-weight: 700; color: #fff; }
+        .match-time { font-size: 0.85rem; color: #fff; background: rgba(255,255,255,0.06); padding: 4px 10px; border-radius: 6px; font-weight: 600; text-align: right; border: 1px solid rgba(255,255,255,0.02); }
+
         .about-text { color: var(--text-muted); font-size: 0.85rem; line-height: 1.5; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 14px; }
-        footer { background-color: #070a10; text-align: center; padding: 20px; font-size: 0.75rem; color: #475569; border-top: 1px solid var(--panel-border); margin-top: auto; }
+        .about-text b { color: rgba(255,255,255,0.9); font-weight: 600; }
 
-        /* Modals and Overlays */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(4, 6, 10, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 9999; transition: opacity 0.3s ease; }
-        .instruction-modal { background-color: #131926; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 28px; max-width: 440px; width: 90%; text-align: center; }
-        .modal-title { font-size: 1.3rem; font-weight: 800; color: #ffffff; margin-bottom: 20px; text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        footer {
+            background-color: #070a10;
+            text-align: center;
+            padding: 20px;
+            font-size: 0.75rem;
+            color: #475569;
+            border-top: 1px solid var(--panel-border);
+            margin-top: auto;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(4, 6, 10, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+        .instruction-modal {
+            background-color: #131926;
+            background-image: linear-gradient(rgba(255,255,255,0.01), transparent);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 28px;
+            max-width: 440px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+        }
+        .modal-title { font-size: 1.3rem; font-weight: 800; color: #ffffff; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .modal-title span { color: var(--primary-color); }
         .modal-body { color: var(--text-muted); font-size: 0.9rem; line-height: 1.5; margin-bottom: 24px; text-align: left; }
         .modal-item { margin-bottom: 16px; display: flex; align-items: flex-start; gap: 12px; }
-        .modal-icon { font-size: 1.1rem; background: rgba(255,255,255,0.04); padding: 6px; border-radius: 8px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; }
-        .modal-btn { background: linear-gradient(135deg, #ff4757 0%, #e03746 100%); color: #ffffff; border: none; padding: 14px; font-size: 0.9rem; font-weight: 700; border-radius: 8px; cursor: pointer; text-transform: uppercase; width: 100%; }
-        body.modal-active .app-layout-grid { filter: blur(6px); pointer-events: none; }
+        .modal-icon { font-size: 1.1rem; background: rgba(255,255,255,0.04); padding: 6px; border-radius: 8px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.02); }
+        .modal-item p { flex: 1; }
+        .modal-item b { color: #fff; font-weight: 600; }
+        .modal-btn { background: linear-gradient(135deg, #ff4757 0%, #e03746 100%); color: #ffffff; border: none; padding: 14px; font-size: 0.9rem; font-weight: 700; border-radius: 8px; cursor: pointer; text-transform: uppercase; width: 100%; letter-spacing: 0.5px; box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3); transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .modal-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(255, 71, 87, 0.4); }
 
-        /* Mobile Breakpoint Refactor */
-        @media (max-width: 1024px) {
-            .app-layout-grid { grid-template-columns: 1fr; padding: 0 0 24px 0; gap: 16px; }
-            .player-alignment-wrapper { margin-top: 15px; }
-            .player-container, .stream-info, .reaction-bar-box, .widget-card { border-radius: 0; border-left: none; border-right: none; }
-            .stream-info, .widget-card { text-align: center; }
+        body.modal-active main { filter: blur(6px); pointer-events: none; }
+
+        @media (max-width: 767px) {
+            .player-alignment-wrapper { margin-top: 15px; padding: 0; }
+            .player-container { border-radius: 0; border-left: none; border-right: none; }
+            main { padding: 0 0 20px 0; gap: 15px; }
+            .stream-info { width: 100%; border-radius: 0; border-left: none; border-right: none; padding: 20px 16px; text-align: center; }
             .info-metrics-row { justify-content: center; }
-            .accordion-header { text-align: left; }
+            .schedule-card { flex-direction: column; align-items: center; gap: 10px; text-align: center; }
+            .match-time { text-align: center; font-size: 0.85rem; padding: 4px 12px; }
         }
 
-        @keyframes floatUpAndFade {
-            0% { transform: translateY(0) scale(0.6); opacity: 0; }
-            10% { opacity: 1; transform: translateY(-20px) scale(1.1); }
-            100% { transform: translateY(-120px) scale(0.8); opacity: 0; }
-        }
-        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+        @keyframes pulse-white { 0% { transform: scale(0.9); opacity: 0.5; box-shadow: 0 0 0 0 rgba(255,255,255,0.4); } 50% { opacity: 1; box-shadow: 0 0 0 6px rgba(255,255,255,0); } 100% { transform: scale(0.9); opacity: 0.5; box-shadow: 0 0 0 0 rgba(255,255,255,0); } }
         @keyframes pulse-green { 0% { transform: scale(0.9); opacity: 0.4; box-shadow: 0 0 0 0 rgba(46, 213, 115, 0.4); } 50% { opacity: 1; box-shadow: 0 0 0 8px rgba(46, 213, 115, 0); } 100% { transform: scale(0.9); opacity: 0.4; box-shadow: 0 0 0 0 rgba(46, 213, 115, 0); } }
     </style>
 </head>
 <body class="modal-active">
 
-    <!-- Information Pop-up Modal -->
     <div class="modal-overlay" id="popup-modal">
         <div class="instruction-modal">
-            <div class="modal-title"><span>⚠️</span> Streaming Rules</div>
+            <div class="modal-title"><span>⚠️</span> Streaming Instructions</div>
             <div class="modal-body">
                 <div class="modal-item">
                     <span class="modal-icon">📶</span>
-                    <p><b>Use Wi-Fi Connection:</b> Watch with higher stability and zero stream stuttering.</p>
+                    <p><b>Use Wi-Fi Connection:</b> Use Wi-Fi to watch the stream with Quality. Using mobile data may cause playback errors or lag.</p>
                 </div>
                 <div class="modal-item">
                     <span class="modal-icon">🔄</span>
-                    <p><b>Lag Resolution:</b> If stream freeze happens, please instantly reload the page context.</p>
+                    <p><b>Lagging Issues:</b> If the video stream buffers or freezes up, kindly <b>reload / refresh</b> your browser page.</p>
+                </div>
+                <div class="modal-item">
+                    <span class="modal-icon">🎧</span>
+                    <p><b>Audio Muted:</b> Browsers block auto-playing sound. If there's no sound, just tap the speaker button inside the player dashboard.</p>
                 </div>
             </div>
-            <button class="modal-btn" onclick="closeInstructions()">Enter Stadium Layout</button>
+            <button class="modal-btn" onclick="closeInstructions()">Got It, Let's Watch!</button>
         </div>
     </div>
 
@@ -349,224 +329,157 @@
         <div class="live-indicator">LIVE</div>
     </header>
 
-    <!-- Main Dynamic Application Grid Container Layout -->
-    <div class="app-layout-grid">
-        
-        <!-- Left Broadcast Layout Column -->
-        <div class="left-column">
-            <div class="player-alignment-wrapper">
-                <div class="player-container">
+    <main>
+        <div class="player-alignment-wrapper">
+            <div class="player-container">
+                <div id="video-display"></div>
+                
+                <div id="mobile-card" class="mobile-fallback-card">
+                    <h3>📱 Mobile Streaming Engine</h3>
+                    <p>Mobile web browsers may block this stream context layout. Tap below to stream directly inside your device players without ads or limits. Get a VLC player app from app store or playstore:</p>
                     
-                    <!-- Smart Status Check Offline Card Panel View -->
-                    <div id="offline-fallback-overlay" class="stream-status-overlay" style="display: none;">
-                        <div class="status-icon">⏳</div>
-                        <h3>Broadcast Offline</h3>
-                        <p>Live stream signals start 15 minutes before match countdown hits zero.</p>
-                    </div>
-
-                    <div id="video-display"></div>
-                </div>
-            </div>
-
-            <!-- Emoji Crowd Reaction Interactive Deck Layout Bar -->
-            <div class="reaction-bar-box">
-                <button class="reaction-btn" onclick="triggerVisualReaction('🔥', 'fire')">🔥 <span class="reaction-counter" id="rc-fire">124</span></button>
-                <button class="reaction-btn" onclick="triggerVisualReaction('🏏', 'six')">🏏 <span class="reaction-counter" id="rc-six">89</span></button>
-                <button class="reaction-btn" onclick="triggerVisualReaction('😮', 'wow')">😮 <span class="reaction-counter" id="rc-wow">45</span></button>
-                <button class="reaction-btn" onclick="triggerVisualReaction('👏', 'clap')">👏 <span class="reaction-counter" id="rc-clap">72</span></button>
-                <button class="reaction-btn" onclick="triggerVisualReaction('😢', 'sad')">😢 <span class="reaction-counter" id="rc-sad">12</span></button>
-            </div>
-
-            <div class="stream-info">
-                <h2>Live Match Streaming: West Indies vs Sri Lanka Tour</h2>
-                <div class="info-metrics-row">
-                    <div class="viewer-count"><span class="pulse-dot"></span><span id="view-number">50</span> watching now</div>
-                    <div class="match-countdown-ticker" id="match-timer-clock">⏳ Loading Timer...</div>
-                </div>
-                <p class="about-text"><i>If you notice lag, kindly refresh your browser. Developed by Venuja :)</i></p>
-            </div>
-
-            <!-- Match Highlights Layout Grid Frame Component -->
-            <div class="widget-card">
-                <div class="widget-header">🎥 Tour Highlights & Recaps</div>
-                <div style="padding: 16px;">
-                    <div class="highlights-grid">
-                        <div class="video-card">
-                            <div class="video-iframe-wrap">
-                                <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
-                            </div>
-                            <div class="video-details">1st T20 Match Highlights - SL vs WI</div>
-                        </div>
-                        <div class="video-card">
-                            <div class="video-iframe-wrap">
-                                <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
-                            </div>
-                            <div class="video-details">2nd T20 Match Highlights - SL vs WI</div>
-                        </div>
-                    </div>
+                    <a id="native-app-link" href="#" class="external-btn">▶️ Play in Device Player</a>
+                    <a id="vlc-app-link" href="#" class="external-btn vlc">🧡 Open in VLC Mobile</a>
                 </div>
             </div>
         </div>
 
-        <!-- Right Side Panel Component Widgets Dashboard Column -->
-        <div class="right-column">
+        <div class="stream-info">
+            <h2>Live Match Streaming: West Indies vs Sri Lanka Tour</h2>
             
-            <!-- Live Score widget card structure container -->
-            <div class="widget-card">
-                <div class="widget-header">📊 Live Match Scorecard</div>
-                <!-- Embed real-time analytics iframe container widget or API endpoint layout cards inside here -->
-                <div style="height: 140px; background: #0e1420; display:flex; flex-direction:column; justify-content:center; align-items:center; color: var(--text-muted); font-size:0.85rem; padding:15px; text-align:center;">
-                    <p style="color:#fff; font-weight:700; margin-bottom:5px;">Sri Lanka vs West Indies</p>
-                    <p>Live Scores refresh instantly on match day start.</p>
+            <div class="info-metrics-row">
+                <div class="viewer-count">
+                    <span class="pulse-dot"></span>
+                    <span id="view-number">50 </span> watching now
+                </div>
+                
+                <div class="match-countdown-ticker" id="match-timer-clock">
+                    ⏳ Loading Timer...
                 </div>
             </div>
 
-            <!-- Live Crowd Banter Chat Frame Container -->
-            <div class="widget-card">
-                <div class="widget-header">💬 Stadium Live Chat</div>
-                <div class="chat-iframe-container">
-                    <!-- Replace with free chat service like Minnit, CBox, or Discord widget -->
-                    <iframe src="https://cbox.ws/box/?boxid=8&boxtag=abc" allow="autoplay"></iframe>
+            <div class="schedule-box">
+                <h4>Upcoming Event</h4>
+                <div class="schedule-card">
+                    <div class="match-teams">3rd T20: West Indies vs Sri Lanka</div>
+                    <div class="match-time">Mon 15 Jun, 2026 @ 06:00 AM</div>
                 </div>
             </div>
 
-            <!-- Prediction Engagement Poll Module Component -->
-            <div class="widget-card">
-                <div class="widget-header">🎯 Live Crowd Predictions</div>
-                <div class="poll-wrapper" id="poll-box-container">
-                    <p class="poll-question">Who wins the 3rd T20 match today?</p>
-                    <button class="poll-option-btn" onclick="submitUserPollVote(1)">
-                        <div class="poll-fill-bar" id="pb-opt1"></div>
-                        <span class="poll-txt">🇱🇰 Sri Lanka</span>
-                        <span class="poll-txt" id="pt-opt1">58%</span>
-                    </button>
-                    <button class="poll-option-btn" onclick="submitUserPollVote(2)">
-                        <div class="poll-fill-bar" id="pb-opt2"></div>
-                        <span class="poll-txt">🌴 West Indies</span>
-                        <span class="poll-txt" id="pt-opt2">42%</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Series Schedule Accordion Block Layout Section -->
-            <div class="widget-card">
-                <div class="widget-header">📅 Tour Series Schedule</div>
-                <div>
-                    <div class="accordion-item">
-                        <div class="accordion-header" onclick="toggleAccordionSection(this)">
-                            <span class="accordion-title">1st T20 - Dambulla Stadium</span>
-                            <span class="accordion-icon">▼</span>
-                        </div>
-                        <div class="accordion-content">
-                            <p><b>Date:</b> June 10, 2026</p>
-                            <p><b>Status:</b> <span class="badge-status win">Sri Lanka won by 4 Wickets</span></p>
-                        </div>
-                    </div>
-                    <div class="accordion-item">
-                        <div class="accordion-header" onclick="toggleAccordionSection(this)">
-                            <span class="accordion-title">2nd T20 - Dambulla Stadium</span>
-                            <span class="accordion-icon">▼</span>
-                        </div>
-                        <div class="accordion-content">
-                            <p><b>Date:</b> June 12, 2026</p>
-                            <p><b>Status:</b> <span class="badge-status win">West Indies won by 12 runs</span></p>
-                        </div>
-                    </div>
-                    <div class="accordion-item">
-                        <div class="accordion-header" onclick="toggleAccordionSection(this)">
-                            <span class="accordion-title">3rd T20 - Dambulla Stadium</span>
-                            <span class="accordion-icon">▼</span>
-                        </div>
-                        <div class="accordion-content">
-                            <p><b>Date:</b> June 15, 2026 @ 06:00 AM</p>
-                            <p><b>Status:</b> <span class="badge-status up">Upcoming Match Live</span></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
+            <p class="about-text">
+                <i>This is a simple website for all Sri Lankan supporters to watch ODI and T20 series. If you notice lag, kindly refresh your browser.</i>
+                <br><br>
+                <b>Made with ❤️ for cricket lovers! Developed by Venuja :)</b>
+            </p>
         </div>
-    </div>
+    </main>
 
-    <footer>&copy; 2026 WebStorm Player Hub. All rights reserved.</footer>
+    <footer>&copy; 2026 WebStorm Player. All rights reserved.</footer>
 
     <script type="text/javascript">
         let clapprPlayerInstance = null;
+        
         const linkVariantOne = "https://webstorm.linkpc.net/live.m3u8";
+        const linkVariantTwo = "https://webstorm.linkpc.net/live.m3u8"; 
 
-        // 1. Structural Modals Dismissals Control Engine
+        // 1. Context Protections
+        document.addEventListener('contextmenu', e => e.preventDefault(), false);
+        document.addEventListener('keydown', function(e) {
+            if (e.key === "F12" || e.keyCode === 123) return e.preventDefault();
+            if (e.ctrlKey && e.shiftKey && (e.key === "I" || e.keyCode === 73)) return e.preventDefault();
+            if (e.ctrlKey && e.shiftKey && (e.key === "J" || e.keyCode === 74)) return e.preventDefault();
+            if (e.ctrlKey && (e.key === "U" || e.keyCode === 85)) return e.preventDefault();
+            if (e.ctrlKey && (e.key === "S" || e.keyCode === 83)) return e.preventDefault();
+        }, false);
+        document.addEventListener('dragstart', e => e.preventDefault());
+
+        // 2. Control Layout Animations
         function closeInstructions() {
             document.getElementById('popup-modal').style.opacity = '0';
             document.body.classList.remove('modal-active');
+            
             setTimeout(() => {
                 document.getElementById('popup-modal').style.display = 'none';
-                if(clapprPlayerInstance) clapprPlayerInstance.play();
+                if(clapprPlayerInstance) {
+                    clapprPlayerInstance.play();
+                }
             }, 300);
         }
 
-        // 2. Smart HLS Stream Connectivity Network Check Script
-        function verifyStreamStatus() {
-            fetch(linkVariantOne, { method: 'HEAD', cache: 'no-store' })
-                .then(response => {
-                    if (response.ok) {
-                        document.getElementById('offline-fallback-overlay').style.display = 'none';
-                        initializeVideoEngine();
-                    } else {
-                        handleOfflineStreamUI();
-                    }
-                })
-                .catch(() => { handleOfflineStreamUI(); });
-        }
+        // 3. Execution Engine Setup
+        function startStreamingEngine() {
+            const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-        function handleOfflineStreamUI() {
-            document.getElementById('offline-fallback-overlay').style.display = 'flex';
-            document.getElementById('video-display').innerHTML = ''; 
-        }
+            if(isMobileDevice) {
+                document.getElementById('native-app-link').href = linkVariantOne;
+                document.getElementById('vlc-app-link').href = "vlc://" + linkVariantOne.replace(/^https?:\/\//, "");
+            }
 
-        function initializeVideoEngine() {
-            clapprPlayerInstance = new Clappr.Player({
+            let playerConfiguration = {
                 source: linkVariantOne,
                 parentId: "#video-display",
-                width: "100%", height: "100%",
-                autoPlay: false, mute: false,
+                width: "100%",
+                height: "100%",
+                autoPlay: true,
+                mute: false,
                 mimeType: "application/x-mpegURL",
-                playback: { playInline: true, recycleVideo: true }
+                preload: "auto",
+                poster: "./poster.png",
+                playback: {
+                    playInline: true,
+                    recycleVideo: true
+                }
+            };
+
+            if (!isMobileDevice) {
+                playerConfiguration.playback.hlsjsConfig = {
+                    enableWorker: true,
+                    lowLatencyMode: true,
+                    maxBufferLength: 6,
+                    liveSyncDurationCount: 3,
+                    liveMaxLatencyDurationCount: 5,
+                    maxMaxBufferLength: 15
+                };
+            }
+
+            clapprPlayerInstance = new Clappr.Player(playerConfiguration);
+
+            clapprPlayerInstance.on(Clappr.Events.PLAYER_ERROR, function() {
+                let currentSource = clapprPlayerInstance.core.getCurrentContainer().options.source;
+                if (currentSource === linkVariantOne && linkVariantOne !== linkVariantTwo) {
+                    console.log("Switching to secondary layout configuration...");
+                    clapprPlayerInstance.load(linkVariantTwo);
+                    clapprPlayerInstance.play();
+                } else {
+                    if(isMobileDevice) {
+                        document.getElementById('mobile-card').style.display = "flex";
+                    }
+                }
+            });
+
+            clapprPlayerInstance.on(Clappr.Events.PLAYER_PLAY, function() {
+                const videoElement = document.querySelector('#video-display video');
+                if (videoElement) {
+                    videoElement.addEventListener('waiting', () => {
+                        setTimeout(() => {
+                            if (videoElement.paused === false) {
+                                videoElement.currentTime = videoElement.currentTime + 0.5;
+                            }
+                        }, 2000); 
+                    });
+                }
             });
         }
 
-        // 3. Floating Emojis Logic Engine
-        function triggerVisualReaction(emojiCharacter, counterKey) {
-            // Simulated state counter bump
-            const currentCounterElement = document.getElementById(`rc-${counterKey}`);
-            currentCounterElement.innerText = parseInt(currentCounterElement.innerText) + 1;
-
-            const elementNode = document.createElement("div");
-            elementNode.className = "floating-emoji";
-            elementNode.innerText = emojiCharacter;
-            
-            // Random distribution over horizontal viewport array limits
-            elementNode.style.left = Math.random() * 60 + 20 + "%";
-            document.body.appendChild(elementNode);
-            
-            setTimeout(() => { elementNode.remove(); }, 2000);
+        // 4. Fake Viewer Counter Script
+        function updateLiveViewers() {
+            const baseTraffic = 50; 
+            const variance = Math.floor(Math.random() * 40) - 20; 
+            const currentViewers = Math.max(80, baseTraffic + variance);
+            document.getElementById('view-number').innerText = currentViewers.toLocaleString();
         }
 
-        // 4. Client Side Engagement Prediction Poll Mechanism
-        function submitUserPollVote(optionId) {
-            // Hardcoded layout transition visualization update calculation
-            document.getElementById('pb-opt1').style.width = optionId === 1 ? "64%" : "54%";
-            document.getElementById('pt-opt1').innerText = optionId === 1 ? "64%" : "54%";
-            document.getElementById('pb-opt2').style.width = optionId === 2 ? "46%" : "36%";
-            document.getElementById('pt-opt2').innerText = optionId === 2 ? "46%" : "36%";
-        }
-
-        // 5. Accordion Expand/Collapse Display Toggle
-        function toggleAccordionSection(headerNode) {
-            const structuralParent = headerNode.parentElement;
-            structuralParent.classList.toggle('active');
-        }
-
-        // 6. Dynamic CountDown Core Timer Execution Loop
+        // 5. Dynamic Live Match Countdown Timer Script
         function runMatchCountdownTimer() {
             const matchTimeTarget = new Date("Jun 15, 2026 06:00:00+05:30").getTime();
             const timerContainer = document.getElementById("match-timer-clock");
@@ -585,28 +498,20 @@
                 const minutes = Math.floor((deltaDifference % (1000 * 60 * 60)) / (1000 * 60));
                 const seconds = Math.floor((deltaDifference % (1000 * 60)) / 1000);
 
-                timerContainer.innerText = `⏳ Starts in: ${hours}h ${minutes}m ${seconds}s`;
+                const displayHours = hours < 10 ? "0" + hours : hours;
+                const displayMinutes = minutes < 10 ? "0" + minutes : minutes;
+                const displaySeconds = seconds < 10 ? "0" + seconds : seconds;
+
+                timerContainer.innerText = `⏳ Starts in: ${displayHours}h ${displayMinutes}m ${displaySeconds}s`;
             }
 
             updateClock();
             const clockIntervalInstance = setInterval(updateClock, 1000);
         }
 
-        // 7. Simulated Audience Random Loop Generator 
-        function updateLiveViewers() {
-            const generatedMetrics = Math.max(82, 50 + Math.floor(Math.random() * 40) - 20);
-            document.getElementById('view-number').innerText = generatedMetrics.toLocaleString();
-        }
-
-        // PWA Service Worker Registration API Engine Hook Call
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').catch(err => console.log('SW registration skipped', err));
-            });
-        }
-
         document.addEventListener("DOMContentLoaded", () => {
-            verifyStreamStatus();
+            startStreamingEngine();
+            updateLiveViewers();
             runMatchCountdownTimer();
             setInterval(updateLiveViewers, 4000);
         });
