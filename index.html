@@ -168,6 +168,15 @@
         }
         .stream-info h2 { font-size: 1.25rem; font-weight: 700; line-height: 1.3; color: #fff; }
         
+        .info-metrics-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
         .viewer-count {
             display: inline-flex;
             align-items: center;
@@ -178,7 +187,6 @@
             border-radius: 30px;
             font-size: 0.8rem;
             font-weight: 600;
-            margin-top: 12px;
         }
         .pulse-dot {
             width: 8px;
@@ -187,6 +195,19 @@
             border-radius: 50%;
             margin-right: 8px;
             animation: pulse-green 1.5s infinite;
+        }
+        
+        /* Countdown Display Box */
+        .match-countdown-ticker {
+            background: rgba(255, 71, 87, 0.08);
+            border: 1px solid rgba(255, 71, 87, 0.2);
+            color: #ff4757;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 0.5px;
         }
         
         /* Premium Match Card Grid */
@@ -260,13 +281,14 @@
 
         body.modal-active main { filter: blur(6px); pointer-events: none; }
 
-        /* Responsive Breakpoints */
+        /* Responsive Breakpoints — Optimized for Center Alignment on Mobile */
         @media (max-width: 767px) {
             .player-container { border-radius: 0; border-left: none; border-right: none; }
             main { padding: 0 0 20px 0; gap: 15px; }
-            .stream-info { width: 100%; border-radius: 0; border-left: none; border-right: none; padding: 16px; }
-            .schedule-card { flex-direction: column; align-items: flex-start; gap: 6px; }
-            .match-time { text-align: left; font-size: 0.8rem; padding: 2px 6px; }
+            .stream-info { width: 100%; border-radius: 0; border-left: none; border-right: none; padding: 20px 16px; text-align: center; }
+            .info-metrics-row { justify-content: center; }
+            .schedule-card { flex-direction: column; align-items: center; gap: 10px; text-align: center; }
+            .match-time { text-align: center; font-size: 0.85rem; padding: 4px 12px; }
         }
 
         @keyframes pulse-white { 0% { transform: scale(0.9); opacity: 0.5; box-shadow: 0 0 0 0 rgba(255,255,255,0.4); } 50% { opacity: 1; box-shadow: 0 0 0 6px rgba(255,255,255,0); } 100% { transform: scale(0.9); opacity: 0.5; box-shadow: 0 0 0 0 rgba(255,255,255,0); } }
@@ -317,9 +339,16 @@
         <div class="stream-info">
             <h2>Live Match Streaming: West Indies vs Sri Lanka Tour</h2>
             
-            <div class="viewer-count">
-                <span class="pulse-dot"></span>
-                <span id="view-number">50 </span> watching now
+            <div class="info-metrics-row">
+                <div class="viewer-count">
+                    <span class="pulse-dot"></span>
+                    <span id="view-number">50 </span> watching now
+                </div>
+                
+                <!-- Live CountDown Clock Placeholder -->
+                <div class="match-countdown-ticker" id="match-timer-clock">
+                    ⏳ Loading Timer...
+                </div>
             </div>
 
             <div class="schedule-box">
@@ -443,9 +472,42 @@
             document.getElementById('view-number').innerText = currentViewers.toLocaleString();
         }
 
+        // 5. Dynamic Live Match Countdown Timer Script
+        function runMatchCountdownTimer() {
+            // Set match target time string to: Mon Jun 15 2026 06:00:00 GMT+0530 (Sri Lanka Standard Time)
+            const matchTimeTarget = new Date("Jun 15, 2026 06:00:00+05:30").getTime();
+            const timerContainer = document.getElementById("match-timer-clock");
+
+            function updateClock() {
+                const now = new Date().getTime();
+                const deltaDifference = matchTimeTarget - now;
+
+                if (deltaDifference <= 0) {
+                    timerContainer.innerText = "🏏 MATCH LIVE";
+                    clearInterval(clockIntervalInstance);
+                    return;
+                }
+
+                const hours = Math.floor((deltaDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((deltaDifference % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((deltaDifference % (1000 * 60)) / 1000);
+
+                // Add leading zeros for stable sizing alignment
+                const displayHours = hours < 10 ? "0" + hours : hours;
+                const displayMinutes = minutes < 10 ? "0" + minutes : minutes;
+                const displaySeconds = seconds < 10 ? "0" + seconds : seconds;
+
+                timerContainer.innerText = `⏳ Starts in: ${displayHours}h ${displayMinutes}m ${displaySeconds}s`;
+            }
+
+            updateClock();
+            const clockIntervalInstance = setInterval(updateClock, 1000);
+        }
+
         document.addEventListener("DOMContentLoaded", () => {
             startStreamingEngine();
             updateLiveViewers();
+            runMatchCountdownTimer();
             setInterval(updateLiveViewers, 4000);
         });
     </script>
