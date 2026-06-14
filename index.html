@@ -101,6 +101,15 @@
             transition: filter 0.3s ease;
         }
         
+        /* Centering and spacing wrapper for the video player container */
+        .player-alignment-wrapper {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 25px; /* Creates the extra gap between the navbar and the video */
+        }
+
         .player-container {
             width: 100%;
             background-color: #000;
@@ -197,7 +206,6 @@
             animation: pulse-green 1.5s infinite;
         }
         
-        /* Countdown Display Box */
         .match-countdown-ticker {
             background: rgba(255, 71, 87, 0.08);
             border: 1px solid rgba(255, 71, 87, 0.2);
@@ -210,7 +218,6 @@
             letter-spacing: 0.5px;
         }
         
-        /* Premium Match Card Grid */
         .schedule-box {
             margin-top: 24px;
             background: rgba(15, 23, 42, 0.5);
@@ -241,7 +248,6 @@
             margin-top: auto;
         }
 
-        /* Instructions Popup Layout */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -281,8 +287,9 @@
 
         body.modal-active main { filter: blur(6px); pointer-events: none; }
 
-        /* Responsive Breakpoints — Optimized for Center Alignment on Mobile */
+        /* Responsive Breakpoints — Centered on Mobile */
         @media (max-width: 767px) {
+            .player-alignment-wrapper { margin-top: 15px; padding: 0; }
             .player-container { border-radius: 0; border-left: none; border-right: none; }
             main { padding: 0 0 20px 0; gap: 15px; }
             .stream-info { width: 100%; border-radius: 0; border-left: none; border-right: none; padding: 20px 16px; text-align: center; }
@@ -324,15 +331,17 @@
     </header>
 
     <main>
-        <div class="player-container">
-            <div id="video-display"></div>
-            
-            <div id="mobile-card" class="mobile-fallback-card">
-                <h3>📱 Mobile Streaming Engine</h3>
-                <p>Mobile web browsers may block this stream context layout. Tap below to stream directly inside your device players without ads or limits. Get a VLC player app from app store or playstore:</p>
+        <div class="player-alignment-wrapper">
+            <div class="player-container">
+                <div id="video-display"></div>
                 
-                <a id="native-app-link" href="#" class="external-btn">▶️ Play in Device Player</a>
-                <a id="vlc-app-link" href="#" class="external-btn vlc">🧡 Open in VLC Mobile</a>
+                <div id="mobile-card" class="mobile-fallback-card">
+                    <h3>📱 Mobile Streaming Engine</h3>
+                    <p>Mobile web browsers may block this stream context layout. Tap below to stream directly inside your device players without ads or limits. Get a VLC player app from app store or playstore:</p>
+                    
+                    <a id="native-app-link" href="#" class="external-btn">▶️ Play in Device Player</a>
+                    <a id="vlc-app-link" href="#" class="external-btn vlc">🧡 Open in VLC Mobile</a>
+                </div>
             </div>
         </div>
 
@@ -345,7 +354,6 @@
                     <span id="view-number">50 </span> watching now
                 </div>
                 
-                <!-- Live CountDown Clock Placeholder -->
                 <div class="match-countdown-ticker" id="match-timer-clock">
                     ⏳ Loading Timer...
                 </div>
@@ -474,7 +482,6 @@
 
         // 5. Dynamic Live Match Countdown Timer Script
         function runMatchCountdownTimer() {
-            // Set match target time string to: Mon Jun 15 2026 06:00:00 GMT+0530 (Sri Lanka Standard Time)
             const matchTimeTarget = new Date("Jun 15, 2026 06:00:00+05:30").getTime();
             const timerContainer = document.getElementById("match-timer-clock");
 
@@ -492,7 +499,6 @@
                 const minutes = Math.floor((deltaDifference % (1000 * 60 * 60)) / (1000 * 60));
                 const seconds = Math.floor((deltaDifference % (1000 * 60)) / 1000);
 
-                // Add leading zeros for stable sizing alignment
                 const displayHours = hours < 10 ? "0" + hours : hours;
                 const displayMinutes = minutes < 10 ? "0" + minutes : minutes;
                 const displaySeconds = seconds < 10 ? "0" + seconds : seconds;
