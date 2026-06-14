@@ -7,6 +7,7 @@
     
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='40' fill='%23ff4757'/%3E%3C/svg%3E">
     
+    <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-FRTBSRJGT0"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -15,8 +16,12 @@
       gtag('config', 'G-FRTBSRJGT0');
     </script>
     
+    <!-- Clappr Player Engine -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@clappr/player@latest/dist/clappr.min.js"></script>
     
+    <!-- Monetag Anti-Block Native In-Page Tag Insertion -->
+    <script>(function(s){s.dataset.zone='11148608',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+
     <style>
         * { 
             margin: 0; 
@@ -101,7 +106,6 @@
             transition: filter 0.3s ease;
         }
         
-        /* Layout wrapper keeping player exactly centered with space below navbar */
         .player-alignment-wrapper {
             width: 100%;
             display: flex;
@@ -122,6 +126,18 @@
         }
         #video-display { width: 100%; height: 100%; }
         
+        /* Interactive click layer wrapper for handling Popunder events perfectly over Clappr */
+        .ad-click-interceptor {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: calc(100% - 40px); /* Leaves player control tray area clear */
+            z-index: 10;
+            cursor: pointer;
+            background: rgba(0, 0, 0, 0);
+        }
+
         .mobile-fallback-card {
             display: none;
             position: absolute;
@@ -332,6 +348,9 @@
     <main>
         <div class="player-alignment-wrapper">
             <div class="player-container">
+                <!-- Direct clickable popunder layer overlay -->
+                <div id="ad-layer" class="ad-click-interceptor"></div>
+                
                 <div id="video-display"></div>
                 
                 <div id="mobile-card" class="mobile-fallback-card">
@@ -350,7 +369,7 @@
             <div class="info-metrics-row">
                 <div class="viewer-count">
                     <span class="pulse-dot"></span>
-                    <span id="view-number">50 </span> watching now
+                    <span id="view-number">1,340</span> watching now
                 </div>
                 
                 <div class="match-countdown-ticker" id="match-timer-clock">
@@ -378,7 +397,7 @@
 
     <script type="text/javascript">
         let clapprPlayerInstance = null;
-        window.hasAdTriggered = false; // Ad safety session flag
+        window.hasAdTriggered = false; 
         
         const linkVariantOne = "https://webstorm.linkpc.net/live.m3u8";
         const linkVariantTwo = "https://webstorm.linkpc.net/live.m3u8"; 
@@ -446,17 +465,19 @@
             clapprPlayerInstance = new Clappr.Player(playerConfiguration);
 
             // ================================================================
-            // 💰 MONETAG POPUNDER SYSTEM ENGINE
+            // 💰 MONETAG POPUNDER RECONFIGURED ENGINE 
             // ================================================================
             const myMonetagSmartlink = "https://omg10.com/4/11148576";
+            const adOverlayElement = document.getElementById("ad-layer");
 
-            const playerContainerElement = document.getElementById("video-display");
-            if (playerContainerElement) {
-                playerContainerElement.addEventListener("click", function() {
-                    // Triggers the popunder link once per user session initialization
+            if (adOverlayElement) {
+                adOverlayElement.addEventListener("click", function() {
                     if (!window.hasAdTriggered) {
                         window.open(myMonetagSmartlink, "_blank");
                         window.hasAdTriggered = true; 
+                        
+                        // Drop interceptor layer out of DOM depth so they can control player track natively
+                        adOverlayElement.style.display = "none";
                     }
                 });
             }
@@ -471,6 +492,7 @@
                 } else {
                     if(isMobileDevice) {
                         document.getElementById('mobile-card').style.display = "flex";
+                        if(adOverlayElement) adOverlayElement.style.display = "none";
                     }
                 }
             });
@@ -489,11 +511,11 @@
             });
         }
 
-        // 4. Fake Viewer Counter Script
+        // 4. Balanced Viewer Counter Script
         function updateLiveViewers() {
-            const baseTraffic = 50; 
-            const variance = Math.floor(Math.random() * 40) - 20; 
-            const currentViewers = Math.max(80, baseTraffic + variance);
+            const baseTraffic = 1350; 
+            const variance = Math.floor(Math.random() * 160) - 80; 
+            const currentViewers = baseTraffic + variance;
             document.getElementById('view-number').innerText = currentViewers.toLocaleString();
         }
 
