@@ -278,7 +278,7 @@
         .modal-title { font-size: 1.3rem; font-weight: 800; color: #ffffff; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .modal-title span { color: var(--primary-color); }
         .modal-body { color: var(--text-muted); font-size: 0.9rem; line-height: 1.5; margin-bottom: 24px; text-align: left; }
-        .modal-item { margin-bottom: 16px; display: flex; align-items: flex-start; gap: 12px; }
+        .modal-body .modal-item { margin-bottom: 16px; display: flex; align-items: flex-start; gap: 12px; }
         .modal-icon { font-size: 1.1rem; background: rgba(255,255,255,0.04); padding: 6px; border-radius: 8px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.02); }
         .modal-item p { flex: 1; }
         .modal-item b { color: #fff; font-weight: 600; }
@@ -378,6 +378,7 @@
 
     <script type="text/javascript">
         let clapprPlayerInstance = null;
+        window.hasAdTriggered = false; // Ad safety session flag
         
         const linkVariantOne = "https://webstorm.linkpc.net/live.m3u8";
         const linkVariantTwo = "https://webstorm.linkpc.net/live.m3u8"; 
@@ -443,6 +444,23 @@
             }
 
             clapprPlayerInstance = new Clappr.Player(playerConfiguration);
+
+            // ================================================================
+            // 💰 MONETAG POPUNDER SYSTEM ENGINE
+            // ================================================================
+            const myMonetagSmartlink = "https://omg10.com/4/11148576";
+
+            const playerContainerElement = document.getElementById("video-display");
+            if (playerContainerElement) {
+                playerContainerElement.addEventListener("click", function() {
+                    // Triggers the popunder link once per user session initialization
+                    if (!window.hasAdTriggered) {
+                        window.open(myMonetagSmartlink, "_blank");
+                        window.hasAdTriggered = true; 
+                    }
+                });
+            }
+            // ================================================================
 
             clapprPlayerInstance.on(Clappr.Events.PLAYER_ERROR, function() {
                 let currentSource = clapprPlayerInstance.core.getCurrentContainer().options.source;
