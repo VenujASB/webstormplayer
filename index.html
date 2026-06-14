@@ -336,7 +336,7 @@
                 </div>
                 <div class="modal-item">
                     <span class="modal-icon">🚀</span>
-                    <p><b>Ads</b> If ads appear, please kindly close them. Thank you for your understanding! </p>
+                    <p><b>Ads:</b> <b>If ads appear, please kindly close them. Thanks for your understanding!</b> </p>
                 </div>
             </div>
             <button class="modal-btn" onclick="closeInstructions()">Got It, Let's Watch!</button>
@@ -372,7 +372,7 @@
             <div class="info-metrics-row">
                 <div class="viewer-count">
                     <span class="pulse-dot"></span>
-                    <span id="view-number">1,340</span> watching now
+                    <span id="view-number">30</span> watching now
                 </div>
                 
                 <div class="match-countdown-ticker" id="match-timer-clock">
@@ -402,8 +402,9 @@
         let clapprPlayerInstance = null;
         window.hasAdTriggered = false; 
         
-        const linkVariantOne = "https://webstorm.linkpc.net/live.m3u8";
-        const linkVariantTwo = "https://webstorm.linkpc.net/live.m3u8"; 
+        // RECONFIGURED TO HTTP TO ALLOW FORCED FALLBACK ENGINES
+        const linkVariantOne = "http://webstorm.linkpc.net/live.m3u8";
+        const linkVariantTwo = "http://webstorm.linkpc.net/live.m3u8"; 
 
         // 1. Context Protections
         document.addEventListener('contextmenu', e => e.preventDefault(), false);
@@ -450,20 +451,32 @@
                 poster: "./poster.png",
                 playback: {
                     playInline: true,
-                    recycleVideo: true
+                    recycleVideo: true,
+                    hlsMinimumBacklogSecs: 30 // Prevents premature playlist end drops
                 }
             };
 
-            if (!isMobileDevice) {
-                playerConfiguration.playback.hlsjsConfig = {
-                    enableWorker: true,
-                    lowLatencyMode: true,
-                    maxBufferLength: 6,
-                    liveSyncDurationCount: 3,
-                    liveMaxLatencyDurationCount: 5,
-                    maxMaxBufferLength: 15
-                };
-            }
+            // RECONFIGURED CUSTOM DATA PARSER SETTINGS TO PREVENT BREAKDOWNS
+            playerConfiguration.playback.hlsjsConfig = {
+                enableWorker: true,
+                lowLatencyMode: false, // Turned off to prevent constant fragment parsing drops
+                maxBufferLength: 15,   // Expanded safety window cache buffer size
+                maxMaxBufferLength: 30,
+                liveSyncDurationCount: 3,
+                
+                // Added complete core network recovery parameters
+                manifestLoadingMaxRetry: 10,
+                manifestLoadingRetryDelay: 1000,
+                levelLoadingMaxRetry: 10,
+                levelLoadingRetryDelay: 1000,
+                fragLoadingMaxRetry: 10,
+                fragLoadingRetryDelay: 1000,
+                
+                // Force custom intercept handler adjustments
+                xhrSetup: function(xhr, url) {
+                    xhr.withCredentials = false;
+                }
+            };
 
             clapprPlayerInstance = new Clappr.Player(playerConfiguration);
 
@@ -486,12 +499,16 @@
             }
             // ================================================================
 
-            clapprPlayerInstance.on(Clappr.Events.PLAYER_ERROR, function() {
+            clapprPlayerInstance.on(Clappr.Events.PLAYER_ERROR, function(error) {
+                console.warn("Stream event break observed: ", error);
                 let currentSource = clapprPlayerInstance.core.getCurrentContainer().options.source;
-                if (currentSource === linkVariantOne && linkVariantOne !== linkVariantTwo) {
-                    console.log("Switching to secondary layout configuration...");
-                    clapprPlayerInstance.load(linkVariantTwo);
-                    clapprPlayerInstance.play();
+                
+                // Try hard reload protocol back inside current instance frame
+                if (currentSource === linkVariantOne) {
+                    setTimeout(() => {
+                        clapprPlayerInstance.load(linkVariantTwo);
+                        clapprPlayerInstance.play();
+                    }, 2000);
                 } else {
                     if(isMobileDevice) {
                         document.getElementById('mobile-card').style.display = "flex";
