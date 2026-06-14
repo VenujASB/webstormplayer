@@ -7,7 +7,6 @@
     
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='40' fill='%23ff4757'/%3E%3C/svg%3E">
     
-    <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-FRTBSRJGT0"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -16,13 +15,10 @@
       gtag('config', 'G-FRTBSRJGT0');
     </script>
     
-    <!-- Clappr Player Engine -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@clappr/player@latest/dist/clappr.min.js"></script>
     
-    <!-- Monetag Anti-Block Native In-Page Tag Insertion -->
     <script>(function(s){s.dataset.zone='11148608',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
 
-    <!-- Monetag Vignette/Interstitial Tag Insertion -->
     <script>(function(s){s.dataset.zone='11148687',s.src='https://n6wxm.com/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
 
     <style>
@@ -128,6 +124,51 @@
             position: relative;
         }
         #video-display { width: 100%; height: 100%; }
+
+        /* DIRECT LINK BACKUP BANNER INTERACTION AREA */
+        .ad-server-box {
+            width: 100%;
+            background: rgba(30, 41, 59, 0.25);
+            border: 1px dashed rgba(59, 130, 246, 0.3);
+            padding: 16px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 5px;
+        }
+        .ad-server-box h5 {
+            color: #fff;
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .ad-server-box p {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-bottom: 12px;
+        }
+        .server-direct-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 24px;
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            text-decoration: none;
+            font-weight: 700;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .server-direct-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.35);
+        }
 
         .mobile-fallback-card {
             display: none;
@@ -302,6 +343,7 @@
             .info-metrics-row { justify-content: center; }
             .schedule-card { flex-direction: column; align-items: center; gap: 10px; text-align: center; }
             .match-time { text-align: center; font-size: 0.85rem; padding: 4px 12px; }
+            .ad-server-box { border-radius: 0; border-left: none; border-right: none; padding: 16px 14px; }
         }
 
         @keyframes pulse-white { 0% { transform: scale(0.9); opacity: 0.5; box-shadow: 0 0 0 0 rgba(255,255,255,0.4); } 50% { opacity: 1; box-shadow: 0 0 0 6px rgba(255,255,255,0); } 100% { transform: scale(0.9); opacity: 0.5; box-shadow: 0 0 0 0 rgba(255,255,255,0); } }
@@ -351,6 +393,14 @@
             </div>
         </div>
 
+        <div class="ad-server-box">
+            <h5>⚡ Stream Having Trouble?</h5>
+            <p>If Server 1 is slow or lagging, try our high-speed backup link below:</p>
+            <a href="https://omg10.com/4/11148576" target="_blank" class="server-direct-btn">
+                🚀 Open High-Speed Server 2
+            </a>
+        </div>
+
         <div class="stream-info">
             <h2>Live Match Streaming: West Indies vs Sri Lanka Tour</h2>
             
@@ -387,7 +437,6 @@
         let clapprPlayerInstance = null;
         window.hasAdTriggered = false; 
         
-        // STREAM PROTOCOL SECURED FOR VERCEL COMPATIBILITY
         const streamLink = "https://webstorm.linkpc.net/live.m3u8";
 
         document.addEventListener('contextmenu', e => e.preventDefault(), false);
@@ -424,7 +473,7 @@
                 width: "100%",
                 height: "100%",
                 autoPlay: true,
-                mute: true, // Auto-start muted to pass browser policy smoothly
+                mute: true, 
                 mimeType: "application/x-mpegURL",
                 preload: "auto",
                 playback: {
@@ -435,7 +484,7 @@
                 hlsjsConfig: {
                     enableWorker: true,
                     lowLatencyMode: false, 
-                    maxBufferLength: 20,    // High safety cushion buffer window
+                    maxBufferLength: 20,    
                     maxMaxBufferLength: 40,
                     liveSyncDurationCount: 4,
                     manifestLoadingMaxRetry: 15,
