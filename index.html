@@ -281,7 +281,7 @@
             <div class="modal-body">
                 <div class="modal-item">
                     <span class="modal-icon">📶</span>
-                    <p><b>Use Wi-Fi Connection:</b> Please use Wi-Fi to watch the stream. Using mobile data may cause playback errors or lag.</p>
+                    <p><b>Use Wi-Fi Connection:</b> Use Wi-Fi to watch the stream with Quality. Using mobile data may cause playback errors or lag.</p>
                 </div>
                 <div class="modal-item">
                     <span class="modal-icon">🔄</span>
@@ -307,7 +307,7 @@
             
             <div id="mobile-card" class="mobile-fallback-card">
                 <h3>📱 Mobile Streaming Engine</h3>
-                <p>Mobile web browsers may block this stream context layout. Tap below to stream directly inside your device players without ads or limits:</p>
+                <p>Mobile web browsers may block this stream context layout. Tap below to stream directly inside your device players without ads or limits. Get a VLC player app from app store or playstore:</p>
                 
                 <a id="native-app-link" href="#" class="external-btn">▶️ Play in Device Player</a>
                 <a id="vlc-app-link" href="#" class="external-btn vlc">🧡 Open in VLC Mobile</a>
@@ -319,21 +319,21 @@
             
             <div class="viewer-count">
                 <span class="pulse-dot"></span>
-                <span id="view-number">120</span> watching live
+                <span id="view-number">50 </span> watching now
             </div>
 
             <div class="schedule-box">
                 <h4>Upcoming Event</h4>
                 <div class="schedule-card">
-                    <div class="match-teams">2nd T20: West Indies vs Sri Lanka</div>
-                    <div class="match-time">Sun 14 Jun, 2026 @ 06:00 AM</div>
+                    <div class="match-teams">3rd T20: West Indies vs Sri Lanka</div>
+                    <div class="match-time">Mon 15 Jun, 2026 @ 06:00 AM</div>
                 </div>
             </div>
 
             <p class="about-text">
-                <i>This is a simple website for all Sri Lankan supporters to view ODI and T20 series. If you notice lag, kindly refresh your browser.</i>
+                <i>This is a simple website for all Sri Lankan supporters to watch ODI and T20 series. If you notice lag, kindly refresh your browser.</i>
                 <br><br>
-                <b>Crafted with ❤️ for cricket lovers! Developed by Venuja.</b>
+                <b>Made with ❤️ for cricket lovers! Developed by Venuja :)</b>
             </p>
         </div>
     </main>
@@ -437,7 +437,7 @@
 
         // 4. Fake Viewer Counter Script
         function updateLiveViewers() {
-            const baseTraffic = 145; 
+            const baseTraffic = 50; 
             const variance = Math.floor(Math.random() * 40) - 20; 
             const currentViewers = Math.max(80, baseTraffic + variance);
             document.getElementById('view-number').innerText = currentViewers.toLocaleString();
