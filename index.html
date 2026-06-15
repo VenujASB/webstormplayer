@@ -101,12 +101,49 @@
             transition: filter 0.3s ease;
         }
         
+        /* 🕹️ STYLISH NEW CHANNEL SWITCHER BAR */
+        .channel-tabs-container {
+            width: 100%;
+            display: flex;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--panel-border);
+            padding: 6px;
+            border-radius: 10px;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .channel-tab-button {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px;
+            background: transparent;
+            color: var(--text-muted);
+            border: none;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .channel-tab-button:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.03);
+        }
+        .channel-tab-button.active-channel {
+            color: #fff;
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.25);
+        }
+
         .player-alignment-wrapper {
             width: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-top: 25px; 
+            margin-top: 5px; 
         }
 
         .player-container {
@@ -339,6 +376,7 @@
             .schedule-card { flex-direction: column; align-items: center; gap: 10px; text-align: center; }
             .match-time { text-align: center; font-size: 0.85rem; padding: 4px 12px; }
             .ad-server-box { border-radius: 0; border-left: none; border-right: none; padding: 16px 14px; }
+            .channel-tabs-container { border-radius: 0; border-left: none; border-right: none; padding: 6px 12px; }
         }
 
         @keyframes pulse-white { 0% { transform: scale(0.9); opacity: 0.5; box-shadow: 0 0 0 0 rgba(255,255,255,0.4); } 50% { opacity: 1; box-shadow: 0 0 0 6px rgba(255,255,255,0); } 100% { transform: scale(0.9); opacity: 0.5; box-shadow: 0 0 0 0 rgba(255,255,255,0); } }
@@ -374,6 +412,15 @@
     </header>
 
     <main>
+        <div class="channel-tabs-container">
+            <button id="btn-cricket" class="channel-tab-button active-channel" onclick="switchChannel('cricket')">
+                🏏 Cricket Live
+            </button>
+            <button id="btn-fifa" class="channel-tab-button" onclick="switchChannel('fifa')">
+                ⚽ FIFA Live Match
+            </button>
+        </div>
+
         <div class="player-alignment-wrapper">
             <div class="player-container">
                 <div id="video-display"></div>
@@ -397,12 +444,12 @@
         </div>
 
         <div class="stream-info">
-            <h2>Live Match Streaming: West Indies vs Sri Lanka Tour</h2>
+            <h2 id="stream-title">Live Cricket & FIFA Streamer</h2>
             
             <div class="info-metrics-row">
                 <div class="viewer-count">
                     <span class="pulse-dot"></span>
-                    <span id="view-number">30</span> watching now
+                    <span id="view-number">1,350</span> watching now
                 </div>
                 
                 <div class="match-countdown-ticker" id="match-timer-clock">
@@ -411,17 +458,17 @@
             </div>
 
             <div class="schedule-box">
-                <h4>Upcoming Event</h4>
+                <h4 id="schedule-heading">Upcoming Event</h4>
                 <div class="schedule-card">
-                    <div class="match-teams">3rd T20: West Indies vs Sri Lanka</div>
-                    <div class="match-time">Mon 15 Jun, 2026 @ 06:00 AM</div>
+                    <div id="schedule-teams" class="match-teams">Test Series: West Indies vs Sri Lanka</div>
+                    <div id="schedule-time" class="match-time">25-30 Jun, 2026</div>
                 </div>
             </div>
 
             <p class="about-text">
-                <i>This is a simple website for all Sri Lankan supporters to watch ODI and T20 series. If you notice lag, kindly refresh your browser.</i>
+                <i>This is a simple website for all supporters to watch premium sports events live. If you notice lag, kindly refresh your browser.</i>
                 <br><br>
-                <b>Made with ❤️ for cricket lovers! Developed by Venuja :)</b>
+                <b>Made with ❤️ for sports lovers! Developed by Venuja :)</b>
             </p>
         </div>
     </main>
@@ -432,7 +479,12 @@
         let clapprPlayerInstance = null;
         window.hasAdTriggered = false; 
         
-        const streamLink = "https://webstorm.linkpc.net/live.m3u8";
+        // 🛰️ DYNAMIC DATA CHANNELS
+        let currentActiveChannel = "cricket";
+        const channelEndpoints = {
+            cricket: "https://webstorm.linkpc.net/live.m3u8",
+            fifa: "https://webstorm.linkpc.net/fifa.m3u8"
+        };
 
         document.addEventListener('contextmenu', e => e.preventDefault(), false);
         document.addEventListener('keydown', function(e) {
@@ -454,16 +506,50 @@
             }, 300);
         }
 
+        // 🔄 TAB SWITCHING CONTROLLER ENGINE
+        function switchChannel(channelKey) {
+            if (channelKey === currentActiveChannel) return;
+            currentActiveChannel = channelKey;
+
+            // Handle UI Class Toggles
+            document.getElementById('btn-cricket').classList.remove('active-channel');
+            document.getElementById('btn-fifa').classList.remove('active-channel');
+            
+            if (channelKey === 'cricket') {
+                document.getElementById('btn-cricket').classList.add('active-channel');
+                document.getElementById('stream-title').innerText = "Live Cricket Streaming";
+                document.getElementById('schedule-heading').innerText = "Upcoming Event";
+                document.getElementById('schedule-teams').innerText = "Test Series: West Indies vs Sri Lanka";
+                document.getElementById('schedule-time').innerText = "25-30 Jun, 2026";
+            } else {
+                document.getElementById('btn-fifa').classList.add('active-channel');
+                document.getElementById('stream-title').innerText = "Live Match Streaming: FIFA Tournament World Feed";
+                document.getElementById('schedule-heading').innerText = "Current Active Event";
+                document.getElementById('schedule-teams').innerText = "FIFA Live Stream Session";
+                document.getElementById('schedule-time').innerText = "LIVE NOW";
+            }
+
+            // Reload Streaming Engine with the selected source endpoint
+            startStreamingEngine();
+        }
+
         function startStreamingEngine() {
+            const activeStreamUrl = channelEndpoints[currentActiveChannel];
             const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
             if(isMobileDevice) {
-                document.getElementById('native-app-link').href = streamLink;
-                document.getElementById('vlc-app-link').href = "vlc://" + streamLink.replace(/^https?:\/\//, "");
+                document.getElementById('native-app-link').href = activeStreamUrl;
+                document.getElementById('vlc-app-link').href = "vlc://" + activeStreamUrl.replace(/^https?:\/\//, "");
+            }
+
+            // If a player engine is running, clean it out completely before re-allocating
+            if (clapprPlayerInstance) {
+                clapprPlayerInstance.destroy();
+                clapprPlayerInstance = null;
             }
 
             let playerConfiguration = {
-                source: streamLink,
+                source: activeStreamUrl,
                 parentId: "#video-display",
                 width: "100%",
                 height: "100%",
@@ -499,15 +585,17 @@
             clapprPlayerInstance.on(Clappr.Events.PLAYER_ERROR, function(error) {
                 console.warn("Recovering engine loop drop...", error);
                 setTimeout(() => {
-                    clapprPlayerInstance.load(streamLink);
-                    clapprPlayerInstance.play();
+                    if (clapprPlayerInstance) {
+                        clapprPlayerInstance.load(channelEndpoints[currentActiveChannel]);
+                        clapprPlayerInstance.play();
+                    }
                 }, 1000);
             });
         }
 
         function updateLiveViewers() {
-            const baseTraffic = 1350; 
-            const variance = Math.floor(Math.random() * 160) - 80; 
+            const baseTraffic = currentActiveChannel === 'cricket' ? 1420 : 980; 
+            const variance = Math.floor(Math.random() * 120) - 60; 
             const currentViewers = baseTraffic + variance;
             document.getElementById('view-number').innerText = currentViewers.toLocaleString();
         }
@@ -517,12 +605,17 @@
             const timerContainer = document.getElementById("match-timer-clock");
 
             function updateClock() {
+                // If FIFA is selected, display custom live feedback tag instead of cricket timer countdown
+                if (currentActiveChannel === "fifa") {
+                    timerContainer.innerText = "⚽ FIFA STREAM LIVE";
+                    return;
+                }
+
                 const now = new Date().getTime();
                 const deltaDifference = matchTimeTarget - now;
 
                 if (deltaDifference <= 0) {
                     timerContainer.innerText = "🏏 MATCH LIVE";
-                    clearInterval(clockIntervalInstance);
                     return;
                 }
 
@@ -534,7 +627,7 @@
             }
 
             updateClock();
-            const clockIntervalInstance = setInterval(updateClock, 1000);
+            setInterval(updateClock, 1000);
         }
 
         document.addEventListener("DOMContentLoaded", () => {
